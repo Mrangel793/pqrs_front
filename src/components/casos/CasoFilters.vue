@@ -86,7 +86,7 @@ const localFilters = ref<CasoFilters>({ ...props.modelValue })
 
 watch(() => props.modelValue, (newValue) => {
   localFilters.value = { ...newValue }
-})
+}, { deep: true })
 
 const tipoOptions = [
   { value: 'peticion', label: 'Petición' },
@@ -123,7 +123,7 @@ function emitFilters() {
 const debouncedEmit = debounce(emitFilters, 500)
 
 function clearFilters() {
-  localFilters.value = {}
+  localFilters.value = {} as CasoFilters
   emitFilters()
 }
 </script>

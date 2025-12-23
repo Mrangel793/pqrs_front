@@ -1,5 +1,6 @@
 import apiClient from './axios'
 import type { ReporteEstadisticas, ReporteTendencias } from '@/types'
+import { mockReportesApi } from './reportes.mock'
 
 export interface ReporteFilters {
   fechaDesde?: string
@@ -9,7 +10,9 @@ export interface ReporteFilters {
   agenteId?: number
 }
 
-export const reportesApi = {
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+
+const api = USE_MOCK ? mockReportesApi : {
   async obtenerEstadisticas(filters?: ReporteFilters): Promise<ReporteEstadisticas> {
     const { data } = await apiClient.get<ReporteEstadisticas>('/reportes/estadisticas', {
       params: filters
@@ -49,3 +52,5 @@ export const reportesApi = {
     return data
   }
 }
+
+export const reportesApi = api

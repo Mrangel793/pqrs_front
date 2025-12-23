@@ -5,6 +5,7 @@ export interface Usuario {
   email: string
   rol: 'admin' | 'agente' | 'supervisor'
   activo: boolean
+  avatar?: string
   createdAt: string
   updatedAt: string
 }

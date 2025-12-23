@@ -1,34 +1,56 @@
 <template>
   <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
-    <div class="flex items-center justify-between h-16 px-6">
-      <div class="flex items-center gap-4">
-        <button
-          type="button"
-          class="text-gray-500 hover:text-gray-700"
-          @click="uiStore.toggleSidebar()"
-        >
-          <Bars3Icon class="h-6 w-6" />
-        </button>
-        <h1 class="text-xl font-semibold text-gray-900">
-          {{ appName }}
+    <div class="flex items-center justify-between h-20 px-8">
+      <!-- Logo/Brand -->
+      <div class="flex items-center gap-3">
+        <div class="h-6 w-6 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-gray-900">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-900 tracking-tight">
+          PQR System
         </h1>
       </div>
 
-      <div class="flex items-center gap-4">
+      <!-- Navigation Menu -->
+      <nav class="hidden md:flex items-center gap-1">
+        <router-link
+          v-for="item in menuItems"
+          :key="item.path"
+          :to="item.path"
+          v-slot="{ isActive }"
+        >
+          <div
+            :class="[
+              'px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200',
+              isActive
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            ]"
+          >
+            {{ item.label }}
+          </div>
+        </router-link>
+      </nav>
+
+      <!-- Right Actions: Notifications & User Profile -->
+      <div class="flex items-center gap-6">
         <button
           type="button"
-          class="relative p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+          class="relative p-2.5 bg-blue-50/50 text-gray-700 hover:text-blue-600 rounded-full transition-colors"
         >
           <BellIcon class="h-6 w-6" />
-          <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
 
         <Menu as="div" class="relative">
-          <MenuButton class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100">
-            <div class="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-              {{ userInitials }}
+          <MenuButton class="group flex items-center">
+            <div class="h-10 w-10 rounded-full border-2 border-transparent group-hover:border-blue-100 transition-all overflow-hidden bg-gray-100 flex items-center justify-center">
+              <span v-if="!authStore.usuario?.avatar" class="text-sm font-bold text-blue-600">
+                {{ userInitials }}
+              </span>
+              <img v-else :src="authStore.usuario.avatar" alt="Avatar" class="h-full w-full object-cover" />
             </div>
-            <ChevronDownIcon class="h-4 w-4 text-gray-500" />
           </MenuButton>
 
           <transition
@@ -39,18 +61,18 @@
             leave-from-class="transform scale-100 opacity-100"
             leave-to-class="transform scale-95 opacity-0"
           >
-            <MenuItems class="absolute right-0 mt-2 w-56 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <div class="px-4 py-3 border-b border-gray-100">
-                <p class="text-sm font-medium text-gray-900">{{ authStore.usuario?.nombre }}</p>
-                <p class="text-xs text-gray-500">{{ authStore.usuario?.email }}</p>
+            <MenuItems class="absolute right-0 mt-3 w-56 origin-top-right rounded-2xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden">
+              <div class="px-5 py-4 bg-gray-50/50 border-b border-gray-100">
+                <p class="text-sm font-bold text-gray-900">{{ authStore.usuario?.nombre }}</p>
+                <p class="text-xs text-gray-500 truncate">{{ authStore.usuario?.email }}</p>
               </div>
-              <div class="py-1">
+              <div class="py-2">
                 <MenuItem v-slot="{ active }">
                   <router-link
                     to="/perfil"
                     :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block px-4 py-2 text-sm text-gray-700'
+                      active ? 'bg-blue-50 text-blue-700' : 'text-gray-700',
+                      'block px-5 py-2.5 text-sm font-medium'
                     ]"
                   >
                     Mi Perfil
@@ -59,8 +81,8 @@
                 <MenuItem v-slot="{ active }">
                   <button
                     :class="[
-                      active ? 'bg-gray-100' : '',
-                      'block w-full text-left px-4 py-2 text-sm text-red-700'
+                      active ? 'bg-red-50 text-red-700' : 'text-red-600',
+                      'block w-full text-left px-5 py-2.5 text-sm font-medium'
                     ]"
                     @click="handleLogout"
                   >
@@ -80,15 +102,27 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { Bars3Icon, BellIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
+import { BellIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
-import { useUIStore } from '@/stores/ui'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const uiStore = useUIStore()
 
 const appName = import.meta.env.VITE_APP_NAME || 'Sistema PQR'
+
+const menuItems = computed(() => {
+  const items = [
+    { path: '/dashboard', label: 'Bandeja de Entrada' },
+    { path: '/casos', label: 'Casos' },
+    { path: '/reportes', label: 'Reportes' }
+  ]
+
+  if (authStore.isAdmin) {
+    items.push({ path: '/configuracion', label: 'Configuración' })
+  }
+
+  return items
+})
 
 const userInitials = computed(() => {
   if (!authStore.usuario) return '??'

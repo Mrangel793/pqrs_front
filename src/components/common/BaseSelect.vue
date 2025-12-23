@@ -35,7 +35,7 @@ interface SelectOption {
 }
 
 interface Props {
-  modelValue: string | number
+  modelValue?: string | number | null
   options: SelectOption[]
   label?: string
   placeholder?: string
@@ -52,7 +52,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 defineEmits<{
-  'update:modelValue': [value: string]
+  'update:modelValue': [value: string | number]
 }>()
 
 const selectClasses = computed(() => {

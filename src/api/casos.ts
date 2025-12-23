@@ -6,8 +6,11 @@ import type {
   PaginatedResponse,
   PaginationParams
 } from '@/types'
+import { mockCasosApi } from './casos.mock'
 
-export const casosApi = {
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+
+const api = USE_MOCK ? mockCasosApi : {
   async listar(
     filters?: CasoFilters,
     pagination?: PaginationParams
@@ -56,3 +59,5 @@ export const casosApi = {
     await apiClient.post(`/casos/${id}/comentarios`, { comentario })
   }
 }
+
+export const casosApi = api

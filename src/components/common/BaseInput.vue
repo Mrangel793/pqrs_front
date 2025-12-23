@@ -32,7 +32,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  modelValue: string | number
+  modelValue?: string | number | null
   label?: string
   type?: string
   placeholder?: string

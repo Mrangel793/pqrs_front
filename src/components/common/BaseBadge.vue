@@ -8,7 +8,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  color?: 'blue' | 'green' | 'yellow' | 'red' | 'gray' | 'orange' | 'purple'
+  color?: 'blue' | 'green' | 'yellow' | 'red' | 'gray' | 'orange' | 'purple' | string
   size?: 'sm' | 'md' | 'lg'
   dot?: boolean
 }
@@ -28,7 +28,7 @@ const badgeClasses = computed(() => {
     lg: 'px-3 py-1.5 text-base'
   }
 
-  const colors = {
+  const colors: Record<string, string> = {
     blue: 'bg-blue-100 text-blue-800',
     green: 'bg-green-100 text-green-800',
     yellow: 'bg-yellow-100 text-yellow-800',
@@ -38,6 +38,6 @@ const badgeClasses = computed(() => {
     purple: 'bg-purple-100 text-purple-800'
   }
 
-  return `${base} ${sizes[props.size]} ${colors[props.color]}`
+  return `${base} ${sizes[props.size]} ${colors[props.color] || colors.gray}`
 })
 </script>

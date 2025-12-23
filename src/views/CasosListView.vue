@@ -43,12 +43,12 @@ import BasePagination from '@/components/common/BasePagination.vue'
 import CasoFilters from '@/components/casos/CasoFilters.vue'
 import CasoTable from '@/components/casos/CasoTable.vue'
 import { useCasosStore } from '@/stores/casos'
-import type { CasoFilters } from '@/types'
+import type { CasoFilters as ICasoFilters } from '@/types'
 
 const router = useRouter()
 const casosStore = useCasosStore()
 
-const filters = ref<CasoFilters>({})
+const filters = ref<ICasoFilters>({})
 const pagination = ref({
   page: 1,
   pageSize: 10
