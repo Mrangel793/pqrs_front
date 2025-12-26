@@ -3,7 +3,8 @@ import type { Adjunto } from '@/types'
 
 export const adjuntosApi = {
   async listar(casoId: number): Promise<Adjunto[]> {
-    const { data } = await apiClient.get<Adjunto[]>(`/casos/${casoId}/adjuntos`)
+    // Postman: GET /api/v1/adjuntos/caso/{id}
+    const { data } = await apiClient.get<Adjunto[]>(`/adjuntos/caso/${casoId}`)
     return data
   },
 
@@ -11,8 +12,9 @@ export const adjuntosApi = {
     const formData = new FormData()
     formData.append('file', file)
 
+    // Postman: POST /api/v1/adjuntos/?caso_id=1
     const { data } = await apiClient.post<Adjunto>(
-      `/casos/${casoId}/adjuntos`,
+      `/adjuntos/?caso_id=${casoId}`,
       formData,
       {
         headers: {
@@ -28,7 +30,8 @@ export const adjuntosApi = {
   },
 
   async descargar(id: number): Promise<Blob> {
-    const { data } = await apiClient.get(`/adjuntos/${id}/descargar`, {
+    // Postman: GET /api/v1/adjuntos/{id}
+    const { data } = await apiClient.get(`/adjuntos/${id}`, {
       responseType: 'blob'
     })
     return data

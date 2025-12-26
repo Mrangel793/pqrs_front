@@ -14,7 +14,8 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 const api = USE_MOCK ? mockReportesApi : {
   async obtenerEstadisticas(filters?: ReporteFilters): Promise<ReporteEstadisticas> {
-    const { data } = await apiClient.get<ReporteEstadisticas>('/reportes/estadisticas', {
+    // Postman: /api/v1/reportes/dashboard
+    const { data } = await apiClient.get<ReporteEstadisticas>('/reportes/dashboard', {
       params: filters
     })
     return data
@@ -24,32 +25,21 @@ const api = USE_MOCK ? mockReportesApi : {
     periodo: 'dia' | 'semana' | 'mes',
     filters?: ReporteFilters
   ): Promise<ReporteTendencias[]> {
-    const { data } = await apiClient.get<ReporteTendencias[]>('/reportes/tendencias', {
-      params: { periodo, ...filters }
-    })
-    return data
+    // No existe en postman
+    console.warn('Endpoint tendencias no existe en Postman')
+    return []
   },
 
   async exportarExcel(filters?: ReporteFilters): Promise<Blob> {
-    const { data } = await apiClient.post(
-      '/reportes/exportar/excel',
-      filters,
-      {
-        responseType: 'blob'
-      }
-    )
-    return data
+    // No existe en postman
+    console.warn('Endpoint exportarExcel no existe en Postman')
+    return new Blob([])
   },
 
   async exportarCSV(filters?: ReporteFilters): Promise<Blob> {
-    const { data } = await apiClient.post(
-      '/reportes/exportar/csv',
-      filters,
-      {
-        responseType: 'blob'
-      }
-    )
-    return data
+     // No existe en postman
+     console.warn('Endpoint exportarCSV no existe en Postman')
+     return new Blob([])
   }
 }
 
