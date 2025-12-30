@@ -3,8 +3,15 @@ import type { Usuario, PaginatedResponse, PaginationParams } from '@/types'
 
 export const usuariosApi = {
   async listar(pagination?: PaginationParams): Promise<PaginatedResponse<Usuario>> {
-    const { data } = await apiClient.get<PaginatedResponse<Usuario>>('/usuarios', {
-      params: pagination
+    // Postman: /api/v1/usuarios/?skip=0&limit=100
+    // Mapeamos pagination page/pageSize a skip/limit
+    const params: any = {}
+    if (pagination) {
+        params.skip = (pagination.page - 1) * pagination.pageSize
+        params.limit = pagination.pageSize
+    }
+    const { data } = await apiClient.get<PaginatedResponse<Usuario>>('/usuarios/', {
+      params
     })
     return data
   },
@@ -15,31 +22,17 @@ export const usuariosApi = {
   },
 
   async crear(usuario: Partial<Usuario>): Promise<Usuario> {
-    const { data } = await apiClient.post<Usuario>('/usuarios', usuario)
+    const { data } = await apiClient.post<Usuario>('/usuarios/', usuario)
     return data
   },
 
   async actualizar(id: number, updates: Partial<Usuario>): Promise<Usuario> {
-    const { data } = await apiClient.patch<Usuario>(`/usuarios/${id}`, updates)
+    // Postman usa PUT para actualizar
+    const { data } = await apiClient.put<Usuario>(`/usuarios/${id}`, updates)
     return data
   },
 
   async eliminar(id: number): Promise<void> {
     await apiClient.delete(`/usuarios/${id}`)
-  },
-
-  async activar(id: number): Promise<Usuario> {
-    const { data } = await apiClient.post<Usuario>(`/usuarios/${id}/activar`)
-    return data
-  },
-
-  async desactivar(id: number): Promise<Usuario> {
-    const { data } = await apiClient.post<Usuario>(`/usuarios/${id}/desactivar`)
-    return data
-  },
-
-  async listarAgentes(): Promise<Usuario[]> {
-    const { data } = await apiClient.get<Usuario[]>('/usuarios/agentes')
-    return data
   }
 }

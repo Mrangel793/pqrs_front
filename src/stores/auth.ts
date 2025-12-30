@@ -25,7 +25,13 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('auth_token', response.token)
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Error al iniciar sesión'
+      if (err.response?.status === 401) {
+        error.value = 'Credenciales incorrectas'
+      } else if (!err.response) {
+        error.value = 'Error de conexión con el servidor'
+      } else {
+        error.value = err.response?.data?.message || 'Error al iniciar sesión'
+      }
       return false
     } finally {
       loading.value = false
