@@ -70,18 +70,18 @@ withDefaults(defineProps<Props>(), {
 })
 
 defineEmits<{
-  view: [id: number]
-  edit: [id: number]
+  view: [id: number | string]
+  edit: [id: number | string]
 }>()
 
 const columns = [
   { key: 'numero', label: 'Número' },
   { key: 'tipo', label: 'Tipo' },
   { key: 'titulo', label: 'Título' },
-  { key: 'estado', label: 'Estado' },
+  // { key: 'estado', label: 'Estado' },
   { key: 'prioridad', label: 'Prioridad' },
   { key: 'semaforo', label: 'Semáforo' },
-  { key: 'fechaCreacion', label: 'Fecha' },
-  { key: 'agenteAsignado', label: 'Agente' }
+  // { key: 'fechaCreacion', label: 'Fecha' },
+  // { key: 'agenteAsignado', label: 'Agente' }
 ]
 </script>

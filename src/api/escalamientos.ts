@@ -2,7 +2,7 @@ import apiClient from './axios'
 import type { Escalamiento, EscalamientoFormData } from '@/types'
 
 export const escalamientosApi = {
-  async listar(casoId?: number): Promise<Escalamiento[]> {
+  async listar(casoId?: number | string): Promise<Escalamiento[]> {
     // Postman: /api/v1/escalamientos/
     // Si pasamos casoId, intentamos filtrar por query param
     const url = casoId ? `/escalamientos/?caso_id=${casoId}` : '/escalamientos/'

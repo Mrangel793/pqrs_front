@@ -31,7 +31,7 @@ import { pdfApi } from '@/api/pdf'
 
 interface Props {
   modelValue: boolean
-  casoId: number
+  casoId: number | string
   casoNumero: string
 }
 

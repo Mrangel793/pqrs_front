@@ -24,13 +24,26 @@ const api = USE_MOCK ? mockCasosApi : {
         params.page = page
         params.page_size = pageSize
     }
-    
+
+    // Ordenamiento: más recientes primero
+    params.sort_by = pagination?.sortBy || 'createdAt'
+    params.sort_order = pagination?.sortOrder || 'desc'
+    // Alternativa común en backends
+    params.ordering = '-createdAt'
+
     // Backend devuelve { total: number, items: [...] }
     const { data: backendResponse } = await apiClient.get<any>('/casos/', {
       params
     })
 
-    const itemsAdaptados = (backendResponse.items || []).map(adaptarCaso)
+    let itemsAdaptados = (backendResponse.items || []).map(adaptarCaso)
+
+    // Ordenar en frontend como fallback (más recientes primero)
+    itemsAdaptados.sort((a: Caso, b: Caso) => {
+      const dateA = new Date(a.fechaCreacion).getTime()
+      const dateB = new Date(b.fechaCreacion).getTime()
+      return dateB - dateA // Descendente: más reciente primero
+    })
 
     return {
       data: itemsAdaptados,
@@ -41,7 +54,7 @@ const api = USE_MOCK ? mockCasosApi : {
     }
   },
 
-  async obtener(id: number): Promise<Caso> {
+  async obtener(id: number | string): Promise<Caso> {
     const { data } = await apiClient.get<any>(`/casos/${id}`)
     return adaptarCaso(data)
   },
@@ -84,49 +97,27 @@ const api = USE_MOCK ? mockCasosApi : {
 export const casosApi = api
 
 function adaptarCaso(data: any): Caso {
-  // Mapeo seguro de campos backend -> frontend
+  // Mapeo de campos backend -> frontend
   return {
-    id: data.id, // UUID string from backend, but frontend expects number? Wait, frontend expects number.
-    // Backend ID is UUID. Frontend ID is number.
-    // This is a MAJOR mismatch.
-    // For now, let's cast or handle it. Ideally frontend should accept any ID.
-    // However, if I change frontend ID type it might break everything.
-    // Let's assume for a moment the backend sends a number or we can use a hash/fake number?
-    // No, backend sends UUID. Frontend 'Caso' interface says: id: number.
-    // I MUST alert the user or change frontend to support string IDs. 
-    // BUT user asked to "connect front to back without damaging backend endpoints unless absolutely necessary".
-    // So I should change frontend types. 
-    
-    // HOWEVER, for this specific 'Invalid time value', let's focus on dates first.
-    // Be careful with ID type mismatch.
-    
+    id: data.id, // UUID string del backend
     numero: data.radicado || data.numero || 'Sin Radicado',
-    tipo: data.tipoTramite?.toLowerCase() || 'peticion', // Backend: Peticion (Capitalized?)
+    tipo: data.tipoTramite?.toLowerCase() || 'peticion',
     titulo: data.detalleSolicitud ? data.detalleSolicitud.substring(0, 50) + '...' : 'Sin Título',
     descripcion: data.detalleSolicitud || '',
-    estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto', // backend: 'Abierto'
-    prioridad: 'media', // Backend doesn't seem to have priority in CasoResponse/CasoBase?? Wait.
-    // Backend schema has 'prioridad'?? No.
-    // CasoBase has: radicado, fechaRecepcion, tipoTramite, estadoCasoId, semaforoId...
-    // It seems backend is missing priority? Or it's calculated?
-    // Let's default to 'media'.
-    
+    estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto',
+    prioridad: data.prioridad || 'media',
     semaforoEstado: data.semaforo?.color?.toLowerCase() || 'verde',
-    
     fechaCreacion: data.createdAt || data.fechaRecepcion || new Date().toISOString(),
     fechaLimite: data.fechaVencimiento || new Date().toISOString(),
     fechaUltimaActualizacion: data.updatedAt || new Date().toISOString(),
-    
     ciudadanoNombre: data.peticionarioNombre || 'Anónimo',
     ciudadanoEmail: data.peticionarioCorreo || '',
-    
-    // Others
-    categoria: 'General',
-    etiquetas: [],
-    adjuntos: [],
-    escalamientos: [],
-    historial: []
-  } as unknown as Caso 
-  // Force cast due to ID type mismatch (string vs number). 
-  // Frontend expects number ID. This will break navigation if not handled.
+    ciudadanoTelefono: data.peticionarioTelefono || '',
+    categoria: data.categoria || 'General',
+    subcategoria: data.subcategoria || '',
+    etiquetas: data.etiquetas || [],
+    adjuntos: data.adjuntos || [],
+    escalamientos: data.escalamientos || [],
+    historial: data.historial || []
+  }
 }

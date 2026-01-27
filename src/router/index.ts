@@ -12,13 +12,11 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: '/dashboard'
+      redirect: '/casos'
     },
     {
       path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
-      meta: { requiresAuth: true }
+      redirect: '/casos'
     },
     {
       path: '/casos',
@@ -81,13 +79,13 @@ router.beforeEach(async (to, from, next) => {
 
     // Verificar si requiere rol de admin
     if (to.meta.requiresAdmin && !authStore.isAdmin) {
-      return next('/dashboard')
+      return next('/casos')
     }
   }
 
-  // Si el usuario está autenticado y trata de ir al login, redirigir al dashboard
+  // Si el usuario está autenticado y trata de ir al login, redirigir a casos
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    return next('/dashboard')
+    return next('/casos')
   }
 
   next()

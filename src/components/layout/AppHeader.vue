@@ -112,7 +112,6 @@ const appName = import.meta.env.VITE_APP_NAME || 'Sistema PQR'
 
 const menuItems = computed(() => {
   const items = [
-    { path: '/dashboard', label: 'Bandeja de Entrada' },
     { path: '/casos', label: 'Casos' },
     { path: '/reportes', label: 'Reportes' }
   ]

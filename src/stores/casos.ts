@@ -32,7 +32,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function obtener(id: number) {
+  async function obtener(id: number | string) {
     try {
       loading.value = true
       error.value = null

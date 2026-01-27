@@ -60,7 +60,7 @@ import type { EscalamientoFormData } from '@/types'
 
 interface Props {
   modelValue: boolean
-  casoId: number
+  casoId: number | string
 }
 
 const props = defineProps<Props>()

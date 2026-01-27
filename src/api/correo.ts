@@ -8,7 +8,7 @@ export interface EnvioCorreoData {
 }
 
 export const correoApi = {
-  async enviarNotificacion(casoId: number, data: EnvioCorreoData): Promise<void> {
+  async enviarNotificacion(casoId: number | string, data: EnvioCorreoData): Promise<void> {
     // Postman: POST /api/v1/correo/send
     // Mapeamos lo que podamos. Backend espera: { "to": [], "subject": "", "body": "" }
     await apiClient.post('/correo/send', {

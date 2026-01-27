@@ -27,7 +27,7 @@ export type Prioridad = 'baja' | 'media' | 'alta' | 'critica'
 export type EstadoSemaforo = 'verde' | 'amarillo' | 'rojo'
 
 export interface Caso {
-  id: number
+  id: number | string
   numero: string
   tipo: TipoCaso
   titulo: string
@@ -42,7 +42,7 @@ export interface Caso {
   ciudadanoEmail: string
   ciudadanoTelefono?: string
   agenteAsignado?: Usuario
-  agenteAsignadoId?: number
+  agenteAsignadoId?: number | string
   categoria: string
   subcategoria?: string
   etiquetas: string[]
@@ -91,10 +91,10 @@ export interface Escalamiento {
 }
 
 export interface EscalamientoFormData {
-  casoId: number
+  casoId: number | string
   motivo: string
   descripcion: string
-  escaladoAId?: number
+  escaladoAId?: number | string
 }
 
 // Tipos de adjuntos

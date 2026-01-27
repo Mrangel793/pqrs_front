@@ -67,7 +67,7 @@ import { correoApi } from '@/api/correo'
 
 interface Props {
   modelValue: boolean
-  casoId: number
+  casoId: number | string
   ciudadanoEmail: string
 }
 

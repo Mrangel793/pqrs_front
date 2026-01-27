@@ -2,7 +2,7 @@ import apiClient from './axios'
 
 export const pdfApi = {
   // Metodo legacy mapeado a uno de los nuevos
-  async generarCaso(casoId: number): Promise<Blob> {
+  async generarCaso(casoId: number | string): Promise<Blob> {
     // Por defecto generamos postilla/apostilla usando el ID como numero_caso?
     // Postman usa "numero_caso": "C-001" en body.
     // Asumimos que podemos enviar el ID o que el backend acepta ID.
