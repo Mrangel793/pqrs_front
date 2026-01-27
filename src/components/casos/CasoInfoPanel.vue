@@ -107,8 +107,8 @@
         </h4>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="bg-gray-50 rounded-lg p-3">
-            <p class="text-xs text-gray-500 mb-1">Creación</p>
-            <p class="text-sm font-medium">{{ formatDateTime(caso.fechaCreacion) }}</p>
+            <p class="text-xs text-gray-500 mb-1">Recepción</p>
+            <p class="text-sm font-medium">{{ formatDateTime(caso.fechaRecepcion) }}</p>
           </div>
           <div class="bg-gray-50 rounded-lg p-3">
             <p class="text-xs text-gray-500 mb-1">Fecha Límite</p>

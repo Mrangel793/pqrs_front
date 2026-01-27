@@ -18,6 +18,7 @@ const MOCK_CASOS: Caso[] = [
         prioridad: 'alta',
         semaforoEstado: 'amarillo',
         fechaCreacion: '2024-12-20T10:00:00Z',
+        fechaRecepcion: '2024-12-20T10:00:00Z',
         fechaLimite: '2024-12-25T10:00:00Z',
         fechaUltimaActualizacion: '2024-12-23T08:00:00Z',
         ciudadanoNombre: 'Juan Pérez',
@@ -40,6 +41,7 @@ const MOCK_CASOS: Caso[] = [
         prioridad: 'media',
         semaforoEstado: 'verde',
         fechaCreacion: '2024-12-22T14:00:00Z',
+        fechaRecepcion: '2024-12-22T14:00:00Z',
         fechaLimite: '2024-12-27T14:00:00Z',
         fechaUltimaActualizacion: '2024-12-22T14:00:00Z',
         ciudadanoNombre: 'María González',
@@ -60,6 +62,7 @@ const MOCK_CASOS: Caso[] = [
         prioridad: 'critica',
         semaforoEstado: 'rojo',
         fechaCreacion: '2024-12-15T09:00:00Z',
+        fechaRecepcion: '2024-12-15T09:00:00Z',
         fechaLimite: '2024-12-20T09:00:00Z',
         fechaUltimaActualizacion: '2024-12-23T07:00:00Z',
         ciudadanoNombre: 'Carlos Rodríguez',
@@ -83,13 +86,36 @@ export const mockCasosApi = {
 
         const page = pagination?.page || 1
         const pageSize = pagination?.pageSize || 10
+        const sortBy = pagination?.sortBy || 'fechaRecepcion'
+        const sortOrder = pagination?.sortOrder || 'desc' // Default to DESC (Newest first)
+
+        // 1. Clonar y Ordenar
+        let filteredCasos = [...MOCK_CASOS]
+        
+        filteredCasos.sort((a, b) => {
+            // Manejar campos de fecha
+            if (sortBy === 'fechaRecepcion' || sortBy === 'fechaCreacion') {
+                const dateA = new Date((a as any)[sortBy] || 0).getTime()
+                const dateB = new Date((b as any)[sortBy] || 0).getTime()
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+            }
+            
+            // Manejar otros campos (fallback simple)
+            return 0
+        })
+
+        // 2. Paginar
+        const total = filteredCasos.length
+        const start = (page - 1) * pageSize
+        const end = start + pageSize
+        const paginatedData = filteredCasos.slice(start, end)
 
         return {
-            data: MOCK_CASOS,
-            total: MOCK_CASOS.length,
+            data: paginatedData,
+            total: total,
             page,
             pageSize,
-            totalPages: Math.ceil(MOCK_CASOS.length / pageSize)
+            totalPages: Math.ceil(total / pageSize)
         }
     },
 

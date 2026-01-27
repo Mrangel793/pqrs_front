@@ -26,10 +26,18 @@ const api = USE_MOCK ? mockCasosApi : {
     }
 
     // Ordenamiento: más recientes primero
-    params.sort_by = pagination?.sortBy || 'createdAt'
-    params.sort_order = pagination?.sortOrder || 'desc'
-    // Alternativa común en backends
-    params.ordering = '-createdAt'
+    // Enviamos múltiples formatos para asegurar que el backend lo entienda
+    params.sort_by = pagination?.sortBy || 'fechaRecepcion'
+    params.sortBy = pagination?.sortBy || 'fechaRecepcion'
+    
+    // Dirección: descendente
+    const direction = pagination?.sortOrder === 'asc' ? 'asc' : 'desc'
+    params.sort_order = direction
+    params.order = direction
+    params.direction = direction
+    
+    // Alternativa común en backends (Django style)
+    params.ordering = direction === 'desc' ? '-fechaRecepcion' : 'fechaRecepcion'
 
     // Backend devuelve { total: number, items: [...] }
     const { data: backendResponse } = await apiClient.get<any>('/casos/', {
@@ -40,8 +48,8 @@ const api = USE_MOCK ? mockCasosApi : {
 
     // Ordenar en frontend como fallback (más recientes primero)
     itemsAdaptados.sort((a: Caso, b: Caso) => {
-      const dateA = new Date(a.fechaCreacion).getTime()
-      const dateB = new Date(b.fechaCreacion).getTime()
+      const dateA = new Date(a.fechaRecepcion).getTime()
+      const dateB = new Date(b.fechaRecepcion).getTime()
       return dateB - dateA // Descendente: más reciente primero
     })
 
@@ -107,7 +115,8 @@ function adaptarCaso(data: any): Caso {
     estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto',
     prioridad: data.prioridad || 'media',
     semaforoEstado: data.semaforo?.color?.toLowerCase() || 'verde',
-    fechaCreacion: data.createdAt || data.fechaRecepcion || new Date().toISOString(),
+    fechaCreacion: data.createdAt || new Date().toISOString(),
+    fechaRecepcion: data.fechaRecepcion || data.createdAt || new Date().toISOString(),
     fechaLimite: data.fechaVencimiento || new Date().toISOString(),
     fechaUltimaActualizacion: data.updatedAt || new Date().toISOString(),
     ciudadanoNombre: data.peticionarioNombre || 'Anónimo',

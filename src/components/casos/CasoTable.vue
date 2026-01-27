@@ -24,7 +24,7 @@
       <SemaforoIndicator :estado="row.semaforoEstado" show-label />
     </template>
 
-    <template #cell-fechaCreacion="{ value }">
+    <template #cell-fechaRecepcion="{ value }">
       {{ formatDate(value) }}
     </template>
 
@@ -81,7 +81,7 @@ const columns = [
   // { key: 'estado', label: 'Estado' },
   { key: 'prioridad', label: 'Prioridad' },
   { key: 'semaforo', label: 'Semáforo' },
-  // { key: 'fechaCreacion', label: 'Fecha' },
+  // { key: 'fechaRecepcion', label: 'Fecha' },
   // { key: 'agenteAsignado', label: 'Agente' }
 ]
 </script>

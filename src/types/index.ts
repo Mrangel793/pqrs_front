@@ -36,6 +36,7 @@ export interface Caso {
   prioridad: Prioridad
   semaforoEstado: EstadoSemaforo
   fechaCreacion: string
+  fechaRecepcion: string
   fechaLimite: string
   fechaUltimaActualizacion: string
   ciudadanoNombre: string
