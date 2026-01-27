@@ -20,17 +20,18 @@
         </div>
         <div>
           <p class="text-sm text-gray-500">Estado</p>
-          <EstadoBadge :estado="caso.estado" />
+          <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded">
+            {{ caso.codigoEstado || 'SIN ESTADO' }}
+          </span>
         </div>
         <div>
           <p class="text-sm text-gray-500">Prioridad</p>
-          <BaseBadge :color="getPrioridadColor(caso.prioridad)">
-            {{ formatPrioridad(caso.prioridad) }}
-          </BaseBadge>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500">Semáforo</p>
-          <SemaforoIndicator :estado="caso.semaforoEstado" show-label />
+          <div class="flex items-center gap-2">
+            <SemaforoIndicator :semaforo="caso.semaforo" :show-label="false" />
+            <span class="text-sm font-medium">
+              {{ caso.semaforo?.descripcion || caso.prioridad }}
+            </span>
+          </div>
         </div>
         <div>
           <p class="text-sm text-gray-500">Agente Asignado</p>

@@ -11,17 +11,13 @@
     </template>
 
     <template #cell-estado="{ row }">
-      <EstadoBadge :estado="row.estado" size="sm" />
+      <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded">
+        {{ row.codigoEstado || 'SIN ESTADO' }}
+      </span>
     </template>
 
     <template #cell-prioridad="{ row }">
-      <BaseBadge :color="getPrioridadColor(row.prioridad)" size="sm">
-        {{ formatPrioridad(row.prioridad) }}
-      </BaseBadge>
-    </template>
-
-    <template #cell-semaforo="{ row }">
-      <SemaforoIndicator :estado="row.semaforoEstado" show-label />
+      <SemaforoIndicator :semaforo="row.semaforo" show-label />
     </template>
 
     <template #cell-fechaRecepcion="{ value }">
@@ -78,9 +74,8 @@ const columns = [
   { key: 'numero', label: 'Número' },
   { key: 'tipo', label: 'Tipo' },
   { key: 'titulo', label: 'Título' },
-  // { key: 'estado', label: 'Estado' },
+  { key: 'estado', label: 'Estado' },
   { key: 'prioridad', label: 'Prioridad' },
-  { key: 'semaforo', label: 'Semáforo' },
   // { key: 'fechaRecepcion', label: 'Fecha' },
   // { key: 'agenteAsignado', label: 'Agente' }
 ]

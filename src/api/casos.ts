@@ -113,8 +113,14 @@ function adaptarCaso(data: any): Caso {
     titulo: data.detalleSolicitud ? data.detalleSolicitud.substring(0, 50) + '...' : 'Sin Título',
     descripcion: data.detalleSolicitud || '',
     estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto',
+    codigoEstado: data.estadoCasoId?.codigo || data.estado_caso?.codigo || 'SIN ESTADO',
     prioridad: data.prioridad || 'media',
-    semaforoEstado: data.semaforo?.color?.toLowerCase() || 'verde',
+    semaforo: data.semaforo || {
+      codigo: 'VERDE',
+      descripcion: 'A tiempo',
+      colorHex: '#22c55e'
+    },
+    semaforoEstado: data.semaforo?.codigo?.toLowerCase() || 'verde',
     fechaCreacion: data.createdAt || new Date().toISOString(),
     fechaRecepcion: data.fechaRecepcion || data.createdAt || new Date().toISOString(),
     fechaLimite: data.fechaVencimiento || new Date().toISOString(),

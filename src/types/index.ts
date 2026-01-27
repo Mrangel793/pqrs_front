@@ -26,6 +26,12 @@ export type EstadoCaso = 'abierto' | 'en_proceso' | 'escalado' | 'cerrado' | 'pe
 export type Prioridad = 'baja' | 'media' | 'alta' | 'critica'
 export type EstadoSemaforo = 'verde' | 'amarillo' | 'rojo'
 
+export interface Semaforo {
+  codigo: string
+  descripcion: string
+  colorHex: string
+}
+
 export interface Caso {
   id: number | string
   numero: string
@@ -33,8 +39,10 @@ export interface Caso {
   titulo: string
   descripcion: string
   estado: EstadoCaso
+  codigoEstado: string // Raw state code from backend (e.g. NUEVO, CERRADO)
   prioridad: Prioridad
-  semaforoEstado: EstadoSemaforo
+  semaforo?: Semaforo
+  semaforoEstado: EstadoSemaforo // Keep for backward compatibility if needed, or remove if verified unused by logic
   fechaCreacion: string
   fechaRecepcion: string
   fechaLimite: string

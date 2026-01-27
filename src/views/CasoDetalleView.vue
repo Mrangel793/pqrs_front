@@ -15,8 +15,10 @@
             <div>
               <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold text-gray-900">Caso {{ caso.numero }}</h1>
-                <EstadoBadge :estado="caso.estado" />
-                <SemaforoIndicator :estado="caso.semaforoEstado" />
+                <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                  {{ caso.codigoEstado || 'SIN ESTADO' }}
+                </span>
+                <SemaforoIndicator :semaforo="caso.semaforo" />
               </div>
               <p class="text-sm text-gray-500 mt-1">{{ caso.titulo }}</p>
             </div>
