@@ -1,5 +1,5 @@
 import apiClient from './axios'
-import type { RegistroAuditoria, PaginatedResponse, PaginationParams } from '@/types'
+import type { RegistroAuditoria, PaginatedResponse, PaginationParams, AuditoriaEvento } from '@/types'
 
 export interface AuditoriaFilters {
   usuarioId?: number
@@ -38,6 +38,11 @@ export const auditoriaApi = {
     const { data } = await apiClient.get<RegistroAuditoria[]>(
       `/auditoria/${entidad}/${entidadId}`
     )
+    return data
+  },
+  
+  async listarByCaso(casoId: string): Promise<AuditoriaEvento[]> {
+    const { data } = await apiClient.get<AuditoriaEvento[]>(`/auditoria/caso/${casoId}`)
     return data
   }
 }

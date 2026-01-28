@@ -56,6 +56,7 @@ import BaseSelect from '@/components/common/BaseSelect.vue'
 import { useToast } from '@/composables/useToast'
 import { escalamientosApi } from '@/api/escalamientos'
 import { useUsuariosStore } from '@/stores/usuarios'
+import { useAuthStore } from '@/stores/auth'
 import type { EscalamientoFormData } from '@/types'
 
 interface Props {
@@ -71,6 +72,7 @@ const emit = defineEmits<{
 }>()
 
 const usuariosStore = useUsuariosStore()
+const authStore = useAuthStore()
 const toast = useToast()
 
 const isOpen = computed({
@@ -89,7 +91,7 @@ const loading = ref(false)
 
 const supervisorOptions = computed(() => {
   return usuariosStore.usuarios
-    .filter((u) => u.rol === 'supervisor' || u.rol === 'admin')
+    .filter((u) => u.id !== authStore.usuario?.id)
     .map((u) => ({
       value: u.id,
       label: u.nombre

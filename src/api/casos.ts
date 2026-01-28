@@ -128,6 +128,8 @@ function adaptarCaso(data: any): Caso {
     ciudadanoNombre: data.peticionarioNombre || 'Anónimo',
     ciudadanoEmail: data.peticionarioCorreo || '',
     ciudadanoTelefono: data.peticionarioTelefono || '',
+    responsable: data.responsable || null,
+    responsableId: data.responsableId || null,
     categoria: data.categoria || 'General',
     subcategoria: data.subcategoria || '',
     etiquetas: data.etiquetas || [],

@@ -35,7 +35,7 @@
         </div>
         <div>
           <p class="text-sm text-gray-500">Agente Asignado</p>
-          <p class="font-medium">{{ caso.agenteAsignado?.nombre || 'Sin asignar' }}</p>
+          <p class="font-medium">{{ caso.responsable?.nombre || 'Sin asignar' }}</p>
         </div>
       </div>
 

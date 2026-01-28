@@ -11,9 +11,15 @@ export const escalamientosApi = {
   },
 
   async crear(escalamientoData: EscalamientoFormData): Promise<Escalamiento> {
+    const payload = {
+      casoId: escalamientoData.casoId,
+      aUsuarioId: escalamientoData.escaladoAId,
+      observacion: `Motivo: ${escalamientoData.motivo}\nDescripción: ${escalamientoData.descripcion}`
+    }
+    
     const { data } = await apiClient.post<Escalamiento>(
       '/escalamientos/',
-      escalamientoData
+      payload
     )
     return data
   },
