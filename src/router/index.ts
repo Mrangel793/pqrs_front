@@ -68,13 +68,13 @@ router.beforeEach(async (to, from, next) => {
 
   // Verificar si la ruta requiere autenticación
   if (to.meta.requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      return next('/login')
+    // Si hay token pero no hay usuario (caso refresh), intentar cargar perfil
+    if (authStore.token && !authStore.usuario) {
+      await authStore.fetchProfile()
     }
 
-    // Si no tenemos el usuario cargado, intentar obtenerlo
-    if (!authStore.usuario) {
-      await authStore.fetchProfile()
+    if (!authStore.isAuthenticated) {
+      return next('/login')
     }
 
     // Verificar si requiere rol de admin

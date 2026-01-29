@@ -10,9 +10,20 @@ export const usuariosApi = {
         params.skip = (pagination.page - 1) * pagination.pageSize
         params.limit = pagination.pageSize
     }
-    const { data } = await apiClient.get<PaginatedResponse<Usuario>>('/usuarios/', {
+    const { data } = await apiClient.get<any>('/usuarios/', {
       params
     })
+
+    if (Array.isArray(data)) {
+      return {
+        data: data,
+        total: data.length,
+        page: pagination?.page || 1,
+        pageSize: pagination?.pageSize || 100,
+        totalPages: 1
+      }
+    }
+
     return data
   },
 

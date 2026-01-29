@@ -108,7 +108,7 @@
                   class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <div class="shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                       <PaperClipIcon class="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
@@ -130,7 +130,7 @@
           <!-- Tab: Escalamientos -->
           <template v-if="activeTab === 'escalamientos'">
             <BaseCard title="Historial de Escalamientos">
-              <div v-if="!caso.escalamientos || caso.escalamientos.length === 0">
+              <div v-if="escalamientos.length === 0">
                 <BaseEmptyState
                   title="Sin escalamientos"
                   description="Este caso no ha sido escalado"
@@ -138,38 +138,22 @@
               </div>
               <div v-else class="space-y-4">
                 <div
-                  v-for="escalamiento in caso.escalamientos"
+                  v-for="escalamiento in escalamientos"
                   :key="escalamiento.id"
-                  class="border rounded-lg p-4"
-                  :class="escalamiento.resuelto ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'"
+                  class="border rounded-lg p-4 border-gray-200 bg-gray-50"
                 >
                   <div class="flex items-start justify-between mb-2">
                     <div class="flex items-center gap-2">
-                      <span
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        :class="escalamiento.resuelto ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                      >
-                        Nivel {{ escalamiento.nivel }}
-                      </span>
-                      <span class="text-xs text-gray-500">{{ formatDateTime(escalamiento.fecha) }}</span>
+                      <span class="text-xs text-gray-500">{{ formatDateTime(escalamiento.fechaEscalamiento) }}</span>
                     </div>
-                    <span
-                      class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-                      :class="escalamiento.resuelto ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
-                    >
-                      {{ escalamiento.resuelto ? 'Resuelto' : 'Pendiente' }}
-                    </span>
                   </div>
-                  <h4 class="font-medium text-gray-900 mb-1">{{ escalamiento.motivo }}</h4>
-                  <p class="text-sm text-gray-600 mb-3">{{ escalamiento.descripcion }}</p>
-                  <div class="flex items-center gap-4 text-xs text-gray-500">
-                    <span>Escalado por: <strong>{{ escalamiento.escaladoPor?.nombre || 'Sistema' }}</strong></span>
-                    <span v-if="escalamiento.escaladoA">
-                      Asignado a: <strong>{{ escalamiento.escaladoA.nombre }}</strong>
-                    </span>
-                  </div>
-                  <div v-if="escalamiento.resuelto && escalamiento.fechaResolucion" class="mt-2 pt-2 border-t text-xs text-gray-500">
-                    Resuelto el: {{ formatDateTime(escalamiento.fechaResolucion) }}
+                  <!-- Observación combinada -->
+                  <div class="text-sm text-gray-800 whitespace-pre-line mb-3">{{ escalamiento.observacion }}</div>
+                  
+                  <div class="flex items-center gap-4 text-xs text-gray-500 border-t pt-2 mt-2">
+                    <span>De: <strong>{{ escalamiento.de_usuario?.nombre || 'Desconocido' }}</strong></span>
+                    <span class="text-gray-300">|</span>
+                    <span>Para: <strong>{{ escalamiento.a_usuario?.nombre || 'Desconocido' }}</strong></span>
                   </div>
                 </div>
               </div>
@@ -179,7 +163,7 @@
 
         <!-- Sidebar con Timeline (siempre visible) -->
         <div>
-          <CasoTimeline :eventos="caso.historial" />
+          <CasoTimeline :eventos="historialEventos" />
         </div>
       </div>
     </div>
@@ -219,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftIcon,
@@ -251,8 +235,11 @@ import EditorRespuesta from '@/components/casos/EditorRespuesta.vue'
 import GestionPDF from '@/components/casos/GestionPDF.vue'
 import { useCasosStore } from '@/stores/casos'
 import { adjuntosApi } from '@/api/adjuntos'
+import { escalamientosApi } from '@/api/escalamientos'
+import { auditoriaApi } from '@/api/auditoria'
 import { formatFileSize, formatRelativeTime, formatDateTime, downloadFile } from '@/utils/helpers'
 import { useToast } from '@/composables/useToast'
+import type { Escalamiento, AuditoriaEvento, HistorialEvento, TipoEvento } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -263,6 +250,9 @@ const showModalEscalar = ref(false)
 const showModalPDF = ref(false)
 const showModalEnvio = ref(false)
 const activeTab = ref('info')
+
+const escalamientos = ref<Escalamiento[]>([])
+const historialEventos = ref<HistorialEvento[]>([])
 
 const caso = computed(() => casosStore.casoActual)
 
@@ -296,10 +286,71 @@ const tabs = computed(() => [
   }
 ])
 
+const pollingInterval = ref<number | null>(null)
+
 onMounted(async () => {
   const id = route.params.id as string
-  await casosStore.obtener(id)
+  await loadData(id)
+  
+  // Polling cada 30 segundos
+  pollingInterval.value = window.setInterval(() => {
+    loadData(id)
+  }, 30000)
 })
+
+onUnmounted(() => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value)
+  }
+})
+
+async function loadData(id: string) {
+  await Promise.all([
+    casosStore.obtener(id),
+    fetchEscalamientos(id),
+    fetchHistorial(id)
+  ])
+}
+
+async function fetchEscalamientos(casoId: string) {
+  try {
+    escalamientos.value = await escalamientosApi.listar(casoId)
+  } catch (e) {
+    console.error('Error fetching escalamientos', e)
+  }
+}
+
+async function fetchHistorial(casoId: string) {
+  try {
+    const auditoriaEventos = await auditoriaApi.listarByCaso(casoId)
+    historialEventos.value = auditoriaEventos.map(mapAuditoriaToHistorial)
+  } catch (e) {
+    console.error('Error fetching historial', e)
+  }
+}
+
+function mapAuditoriaToHistorial(evento: AuditoriaEvento): HistorialEvento {
+  // Mapeo de tipoAccionId a TipoEvento del frontend
+  // IDs backend: 1=crear, 2=actualizar, 3=eliminar, 4=ESCAlAMIENTO, 5=LOGIN, 6=RECUPERAR, 7=ACT_ESCALAMIENTO
+  const tipoMap: Record<number, TipoEvento> = {
+    1: 'creacion',
+    2: 'cambio_estado',
+    3: 'cambio_estado', 
+    4: 'escalamiento',
+    5: 'asignacion', // Login (no usado aqui habitualmente)
+    6: 'cambio_estado', 
+    7: 'escalamiento' 
+  }
+  return {
+    id: evento.id,
+    casoId: evento.casoId ? parseInt(evento.casoId) : 0,
+    tipo: tipoMap[evento.tipoAccionId] || 'cambio_estado',
+    descripcion: evento.tipo_accion?.descripcion || 'Evento',
+    usuario: evento.usuario || { id: 0, nombre: 'Sistema', email: '', rol: 'admin', activo: true, createdAt: '', updatedAt: '' },
+    fecha: evento.fechaEvento,
+    metadata: evento.detalleJson ? JSON.parse(evento.detalleJson) : undefined
+  }
+}
 
 function handleEdit() {
   const id = route.params.id as string
@@ -308,7 +359,7 @@ function handleEdit() {
 
 async function handleEscalado() {
   const id = route.params.id as string
-  await casosStore.obtener(id)
+  await loadData(id)
   toast.success('El historial se ha actualizado')
 }
 

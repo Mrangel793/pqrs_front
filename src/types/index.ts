@@ -50,8 +50,8 @@ export interface Caso {
   ciudadanoNombre: string
   ciudadanoEmail: string
   ciudadanoTelefono?: string
-  agenteAsignado?: Usuario
-  agenteAsignadoId?: number | string
+  responsable?: Usuario
+  responsableId?: number | string
   categoria: string
   subcategoria?: string
   etiquetas: string[]
@@ -88,14 +88,15 @@ export interface CasoFilters {
 // Tipos de escalamientos
 export interface Escalamiento {
   id: number
-  casoId: number
-  nivel: number
-  motivo: string
-  descripcion: string
-  escaladoPor: Usuario
-  escaladoA?: Usuario
-  fecha: string
-  resuelto: boolean
+  casoId: string
+  deUsuarioId: number
+  aUsuarioId: number
+  observacion: string
+  fechaEscalamiento: string
+  de_usuario?: Usuario
+  a_usuario?: Usuario
+  // Mantenemos compatibilidad opcional si es necesario, o refactorizamos todo
+  resuelto?: boolean
   fechaResolucion?: string
 }
 
@@ -137,6 +138,25 @@ export interface HistorialEvento {
   usuario: Usuario
   fecha: string
   metadata?: Record<string, any>
+}
+
+// Tipos de auditoría del backend
+export interface TipoAccion {
+  id: number
+  codigo: string
+  descripcion: string
+}
+
+export interface AuditoriaEvento {
+  id: number
+  casoId?: string
+  usuarioId?: number
+  tipoAccionId: number
+  detalleJson?: string
+  ipOrigen?: string
+  fechaEvento: string
+  tipo_accion?: TipoAccion
+  usuario?: Usuario
 }
 
 // Tipos de configuración
