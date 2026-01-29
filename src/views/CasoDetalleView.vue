@@ -79,6 +79,19 @@
             <CasoInfoPanel :caso="caso" />
           </template>
 
+          <!-- Tab: Respuesta (RF-06) -->
+          <template v-if="activeTab === 'respuesta'">
+            <EditorRespuesta :caso-id="route.params.id as string" />
+          </template>
+
+          <!-- Tab: PDF (RF-07) -->
+          <template v-if="activeTab === 'pdf'">
+            <GestionPDF
+              :caso-id="route.params.id as string"
+              :caso-numero="caso?.numero || ''"
+            />
+          </template>
+
           <!-- Tab: Adjuntos -->
           <template v-if="activeTab === 'adjuntos'">
             <BaseCard title="Archivos Adjuntos">
@@ -218,7 +231,9 @@ import {
   ArrowDownTrayIcon,
   InformationCircleIcon,
   DocumentDuplicateIcon,
-  ArrowUpCircleIcon
+  ArrowUpCircleIcon,
+  PencilSquareIcon,
+  DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -232,6 +247,8 @@ import SemaforoIndicator from '@/components/casos/SemaforoIndicator.vue'
 import ModalEscalar from '@/components/casos/ModalEscalar.vue'
 import ModalGenerarPDF from '@/components/casos/ModalGenerarPDF.vue'
 import ModalConfirmarEnvio from '@/components/casos/ModalConfirmarEnvio.vue'
+import EditorRespuesta from '@/components/casos/EditorRespuesta.vue'
+import GestionPDF from '@/components/casos/GestionPDF.vue'
 import { useCasosStore } from '@/stores/casos'
 import { adjuntosApi } from '@/api/adjuntos'
 import { formatFileSize, formatRelativeTime, formatDateTime, downloadFile } from '@/utils/helpers'
@@ -254,6 +271,16 @@ const tabs = computed(() => [
     id: 'info',
     name: 'Información',
     icon: InformationCircleIcon
+  },
+  {
+    id: 'respuesta',
+    name: 'Respuesta',
+    icon: PencilSquareIcon
+  },
+  {
+    id: 'pdf',
+    name: 'PDF',
+    icon: DocumentTextIcon
   },
   {
     id: 'adjuntos',

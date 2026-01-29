@@ -1,11 +1,9 @@
 import apiClient from './axios'
+import type { PDFVersionInfo, PDFGenerarResponse, TipoPlantillaPDF } from '@/types'
 
 export const pdfApi = {
   // Metodo legacy mapeado a uno de los nuevos
   async generarCaso(casoId: number | string): Promise<Blob> {
-    // Por defecto generamos postilla/apostilla usando el ID como numero_caso?
-    // Postman usa "numero_caso": "C-001" en body.
-    // Asumimos que podemos enviar el ID o que el backend acepta ID.
     return this.generarPostilla(casoId.toString())
   },
 
@@ -36,10 +34,56 @@ export const pdfApi = {
     return data
   },
 
+  // RF-07: Nuevos endpoints con versionado
+
+  /**
+   * Genera un nuevo PDF para el caso con plantilla institucional
+   * POST /pqrs/{id}/pdf/generar
+   */
+  async generar(
+    casoId: number | string,
+    tipoPlantilla: TipoPlantillaPDF,
+    textoAdicional?: string
+  ): Promise<PDFGenerarResponse> {
+    const { data } = await apiClient.post(`/pqrs/${casoId}/pdf/generar`, {
+      tipo_plantilla: tipoPlantilla,
+      texto_adicional: textoAdicional
+    })
+    return data
+  },
+
+  /**
+   * Obtiene el historial de versiones de PDF generados
+   * GET /pqrs/{id}/pdf/versiones
+   */
+  async listarVersiones(casoId: number | string): Promise<PDFVersionInfo[]> {
+    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/versiones`)
+    return data
+  },
+
+  /**
+   * Descarga una versión específica del PDF
+   * GET /pqrs/{id}/pdf/{version}/descargar
+   */
+  async descargarVersion(casoId: number | string, version: number): Promise<Blob> {
+    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/${version}/descargar`, {
+      responseType: 'blob'
+    })
+    return data
+  },
+
+  /**
+   * Obtiene preview de una versión específica del PDF
+   * GET /pqrs/{id}/pdf/{version}/preview
+   */
+  async previewVersion(casoId: number | string, version: number): Promise<Blob> {
+    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/${version}/preview`, {
+      responseType: 'blob'
+    })
+    return data
+  },
+
   async generarReporte(tipo: string, filtros?: Record<string, any>): Promise<Blob> {
-    // Postman no muestra endpoint de reportes PDF genericos
-    // Intentamos usar el endpoint de reportes si existe, o dejamos este como estaba
-    // pero apuntando a reportes
     console.warn('Endpoint PDF Reporte no definido explicitamente')
     return new Blob([])
   }

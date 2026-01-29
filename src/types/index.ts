@@ -248,3 +248,38 @@ export interface IngestaFormData {
   prioridad: Prioridad
   categoria: string
 }
+
+// RF-06: Tipos para Editor de Respuesta
+export interface RespuestaResponse {
+  texto_html: string
+  texto_adicional?: string
+  ultima_modificacion: string
+  modificado_por?: string
+}
+
+export interface ImagenRespuesta {
+  url: string
+  nombre: string
+}
+
+// RF-07: Tipos para Generación de PDF
+export type TipoPlantillaPDF = 'FACTURA' | 'POSTILLA' | 'FALLA'
+
+export interface PDFVersionInfo {
+  version: number
+  tipo_plantilla: TipoPlantillaPDF
+  fecha_generacion: string
+  generado_por: string
+  url_descarga: string
+}
+
+export interface PDFGenerarRequest {
+  tipo_plantilla: TipoPlantillaPDF
+  texto_adicional?: string
+}
+
+export interface PDFGenerarResponse {
+  version: number
+  url_descarga: string
+  fecha_generacion: string
+}
