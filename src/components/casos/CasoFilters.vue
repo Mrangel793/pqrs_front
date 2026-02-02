@@ -32,14 +32,6 @@
         @update:model-value="emitFilters"
       />
 
-      <BaseSelect
-        v-model="localFilters.semaforoEstado"
-        label="Semáforo"
-        placeholder="Todos"
-        :options="semaforoOptions"
-        @update:model-value="emitFilters"
-      />
-
       <BaseInput
         v-model="localFilters.fechaDesde"
         type="date"
@@ -55,16 +47,14 @@
       />
 
       <div class="flex items-end">
-        <BaseButton variant="secondary" block @click="clearFilters">
-          Limpiar Filtros
-        </BaseButton>
+        <BaseButton variant="secondary" block @click="clearFilters"> Limpiar Filtros </BaseButton>
       </div>
     </div>
   </BaseCard>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
@@ -74,9 +64,16 @@ import type { CasoFilters } from '@/types'
 
 interface Props {
   modelValue: CasoFilters
+  tipos: string[]
+  estados: { value: number; label: string }[]
+  prioridades: { value: number; label: string; color: string }[]
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  tipos: () => [],
+  estados: () => [],
+  prioridades: () => [],
+})
 
 const emit = defineEmits<{
   'update:modelValue': [value: CasoFilters]
@@ -84,37 +81,31 @@ const emit = defineEmits<{
 
 const localFilters = ref<CasoFilters>({ ...props.modelValue })
 
-watch(() => props.modelValue, (newValue) => {
-  localFilters.value = { ...newValue }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localFilters.value = { ...newValue }
+  },
+  { deep: true },
+)
 
-const tipoOptions = [
-  { value: 'peticion', label: 'Petición' },
-  { value: 'queja', label: 'Queja' },
-  { value: 'reclamo', label: 'Reclamo' },
-  { value: 'sugerencia', label: 'Sugerencia' }
-]
+const tipoOptions = computed(() => {
+  if (props.tipos.length === 0) return []
+  return props.tipos.map((t) => ({
+    value: t,
+    label: t.charAt(0).toUpperCase() + t.slice(1),
+  }))
+})
 
-const estadoOptions = [
-  { value: 'abierto', label: 'Abierto' },
-  { value: 'en_proceso', label: 'En Proceso' },
-  { value: 'escalado', label: 'Escalado' },
-  { value: 'cerrado', label: 'Cerrado' },
-  { value: 'pendiente', label: 'Pendiente' }
-]
+const estadoOptions = computed(() => props.estados)
 
-const prioridadOptions = [
-  { value: 'baja', label: 'Baja' },
-  { value: 'media', label: 'Media' },
-  { value: 'alta', label: 'Alta' },
-  { value: 'critica', label: 'Crítica' }
-]
-
-const semaforoOptions = [
-  { value: 'verde', label: 'Verde' },
-  { value: 'amarillo', label: 'Amarillo' },
-  { value: 'rojo', label: 'Rojo' }
-]
+const prioridadOptions = computed(() => {
+  return props.prioridades.map((p) => ({
+    value: p.value,
+    label: p.label,
+    color: p.color,
+  }))
+})
 
 function emitFilters() {
   emit('update:modelValue', { ...localFilters.value })

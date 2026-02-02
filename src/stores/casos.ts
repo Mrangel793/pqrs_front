@@ -15,6 +15,38 @@ export const useCasosStore = defineStore('casos', () => {
   const pageSize = ref(10)
   const totalPages = ref(0)
 
+  // Filtros dinámicos
+  const filtrosOptions = ref<{ 
+    tipos: string[], 
+    estados: { value: number, label: string, codigo: string }[],
+    prioridades: { value: number, label: string, codigo: string, color: string }[] 
+  }>({
+    tipos: [],
+    estados: [],
+    prioridades: []
+  })
+
+  // Estado persistente de filtros y paginacion
+  const activeFilters = ref<CasoFilters>({})
+  const paginationConfig = ref<PaginationParams>({
+    page: 1,
+    pageSize: 10,
+    sortBy: 'fechaRecepcion',
+    sortOrder: 'desc'
+  })
+
+  function resetFilters() {
+    activeFilters.value = {}
+    paginationConfig.value = {
+        page: 1,
+        pageSize: 10,
+        sortBy: 'fechaRecepcion',
+        sortOrder: 'desc'
+    }
+    // Opcional: recargar
+    // listar(activeFilters.value, paginationConfig.value)
+  }
+
   async function listar(filters?: CasoFilters, pagination?: PaginationParams) {
     try {
       loading.value = true
@@ -29,6 +61,19 @@ export const useCasosStore = defineStore('casos', () => {
       error.value = err.response?.data?.message || 'Error al cargar casos'
     } finally {
       loading.value = false
+    }
+  }
+
+  async function cargarFiltros() {
+    try {
+      const data = await casosApi.obtenerFiltros()
+      filtrosOptions.value = {
+        tipos: data.tipos,
+        estados: data.estados,
+        prioridades: data.prioridades || []
+      }
+    } catch (err) {
+      console.warn('Error cargando filtros', err)
     }
   }
 
@@ -61,7 +106,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function actualizar(id: number, updates: Partial<CasoFormData>) {
+  async function actualizar(id: number | string, updates: Partial<CasoFormData>) {
     try {
       loading.value = true
       error.value = null
@@ -87,7 +132,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function eliminar(id: number) {
+  async function eliminar(id: number | string) {
     try {
       loading.value = true
       error.value = null
@@ -105,7 +150,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function asignar(id: number, agenteId: number) {
+  async function asignar(id: number | string, agenteId: number) {
     try {
       loading.value = true
       error.value = null
@@ -129,7 +174,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function cambiarEstado(id: number, estado: string) {
+  async function cambiarEstado(id: number | string, estado: string) {
     try {
       loading.value = true
       error.value = null
@@ -153,7 +198,7 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
-  async function cambiarPrioridad(id: number, prioridad: string) {
+  async function cambiarPrioridad(id: number | string, prioridad: string) {
     try {
       loading.value = true
       error.value = null
@@ -198,6 +243,11 @@ export const useCasosStore = defineStore('casos', () => {
     asignar,
     cambiarEstado,
     cambiarPrioridad,
-    limpiarCasoActual
+    limpiarCasoActual,
+    filtrosOptions,
+    cargarFiltros,
+    activeFilters,
+    paginationConfig,
+    resetFilters
   }
 })

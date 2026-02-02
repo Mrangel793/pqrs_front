@@ -137,10 +137,10 @@ export const mockCasosApi = {
         }
     },
 
-    async obtener(id: number): Promise<Caso> {
+    async obtener(id: number | string): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 300))
         console.log('🎭 Mock Obtener Caso:', id)
-        const caso = MOCK_CASOS.find(c => c.id === id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
         if (!caso) throw new Error('Caso no encontrado')
         return caso
     },
@@ -169,45 +169,68 @@ export const mockCasosApi = {
         return nuevoCaso
     },
 
-    async actualizar(id: number, updates: Partial<CasoFormData>): Promise<Caso> {
+    async actualizar(id: number | string, updates: Partial<CasoFormData>): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 500))
         console.log('🎭 Mock Actualizar Caso:', id, updates)
-        const caso = MOCK_CASOS.find(c => c.id === id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
         if (!caso) throw new Error('Caso no encontrado')
         return { ...caso, ...updates }
     },
 
-    async eliminar(id: number): Promise<void> {
+    async eliminar(id: number | string): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Eliminar Caso:', id)
     },
 
-    async asignar(id: number, agenteId: number): Promise<Caso> {
+    async asignar(id: number | string, agenteId: number): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Asignar Caso:', id, 'a agente', agenteId)
-        const caso = MOCK_CASOS.find(c => c.id === id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
         if (!caso) throw new Error('Caso no encontrado')
-        return { ...caso, agenteAsignadoId: agenteId }
+        return { ...caso, responsableId: agenteId }
     },
 
-    async cambiarEstado(id: number, estado: string): Promise<Caso> {
+    async cambiarEstado(id: number | string, estado: string): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Cambiar Estado:', id, estado)
-        const caso = MOCK_CASOS.find(c => c.id === id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
         if (!caso) throw new Error('Caso no encontrado')
         return { ...caso, estado: estado as any }
     },
 
-    async cambiarPrioridad(id: number, prioridad: string): Promise<Caso> {
+    async cambiarPrioridad(id: number | string, prioridad: string): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Cambiar Prioridad:', id, prioridad)
-        const caso = MOCK_CASOS.find(c => c.id === id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
         if (!caso) throw new Error('Caso no encontrado')
         return { ...caso, prioridad: prioridad as any }
     },
 
-    async agregarComentario(id: number, comentario: string): Promise<void> {
+    async agregarComentario(id: number | string, comentario: string): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Agregar Comentario:', id, comentario)
+    },
+
+    async obtenerFiltros(): Promise<{ 
+        tipos: string[], 
+        estados: { value: number, label: string, codigo: string }[],
+        prioridades: { value: number, label: string, codigo: string, color: string }[]
+    }> {
+        await new Promise(resolve => setTimeout(resolve, 300))
+        return {
+            tipos: ['peticion', 'queja', 'reclamo', 'sugerencia'],
+            estados: [
+                { value: 1, label: 'Abierto', codigo: 'ABIERTO' },
+                { value: 2, label: 'En Proceso', codigo: 'EN_PROCESO' },
+                { value: 3, label: 'Escalado', codigo: 'ESCALADO' },
+                { value: 4, label: 'Cerrado', codigo: 'CERRADO' }
+            ],
+            prioridades: [
+                { value: 1, label: 'Sin urgencia', codigo: 'VERDE', color: '#22C55E' },
+                { value: 2, label: 'Pre-alerta', codigo: 'AMARILLA', color: '#FACC15' },
+                { value: 3, label: 'Prioritario', codigo: 'NARANJA', color: '#F97316' },
+                { value: 4, label: 'Crítico', codigo: 'ROJO', color: '#EF4444' }
+            ]
+        }
     }
 }
