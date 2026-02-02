@@ -190,6 +190,15 @@ export const mockCasosApi = {
         return { ...caso, responsableId: agenteId }
     },
 
+    async asignarme(id: number | string): Promise<Caso> {
+        await new Promise(resolve => setTimeout(resolve, 400))
+        console.log('🎭 Mock Asignarme Caso:', id)
+        const caso = MOCK_CASOS.find(c => c.id == id)
+        if (!caso) throw new Error('Caso no encontrado')
+        // Mock: Asignar a usuario ficticio ID 1
+        return { ...caso, responsableId: 1, estado: 'en_proceso', codigoEstado: 'EN_PROCEOSO' }
+    },
+
     async cambiarEstado(id: number | string, estado: string): Promise<Caso> {
         await new Promise(resolve => setTimeout(resolve, 400))
         console.log('🎭 Mock Cambiar Estado:', id, estado)

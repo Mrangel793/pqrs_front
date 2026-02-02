@@ -103,6 +103,11 @@ const api = USE_MOCK ? mockCasosApi : {
     return this.actualizar(id, { agente_asignado_id: agenteId })
   },
 
+  async asignarme(id: number | string): Promise<Caso> {
+    const { data } = await apiClient.post<any>(`/casos/${id}/asignar-me`)
+    return adaptarCaso(data)
+  },
+
   async cambiarEstado(id: number, estado: string): Promise<Caso> {
     return this.actualizar(id, { estado })
   },

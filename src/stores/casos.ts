@@ -174,6 +174,30 @@ export const useCasosStore = defineStore('casos', () => {
     }
   }
 
+  async function asignarme(id: number | string) {
+    try {
+      loading.value = true
+      error.value = null
+      const casoActualizado = await casosApi.asignarme(id)
+
+      const index = casos.value.findIndex((c) => c.id === id)
+      if (index !== -1) {
+        casos.value[index] = casoActualizado
+      }
+
+      if (casoActual.value?.id === id) {
+        casoActual.value = casoActualizado
+      }
+
+      return casoActualizado
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Error al auto-asignar caso'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function cambiarEstado(id: number | string, estado: string) {
     try {
       loading.value = true
@@ -241,6 +265,7 @@ export const useCasosStore = defineStore('casos', () => {
     actualizar,
     eliminar,
     asignar,
+    asignarme,
     cambiarEstado,
     cambiarPrioridad,
     limpiarCasoActual,

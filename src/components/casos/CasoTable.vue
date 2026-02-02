@@ -11,7 +11,9 @@
     </template>
 
     <template #cell-estado="{ row }">
-      <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded">
+      <span
+        class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded"
+      >
         {{ row.codigoEstado || 'SIN ESTADO' }}
       </span>
     </template>
@@ -25,16 +27,20 @@
     </template>
 
     <template #cell-agenteAsignado="{ row }">
-      {{ row.agenteAsignado?.nombre || 'Sin asignar' }}
+      {{ row.responsable?.nombre || 'Sin asignar' }}
     </template>
 
     <template #actions="{ row }">
       <div class="flex gap-2">
-        <BaseButton size="sm" variant="ghost" @click="$emit('view', row.id)">
-          Ver
-        </BaseButton>
-        <BaseButton size="sm" variant="ghost" @click="$emit('edit', row.id)">
-          Editar
+        <BaseButton size="sm" variant="ghost" @click="$emit('view', row.id)"> Ver </BaseButton>
+        <BaseButton
+          v-if="!row.responsableId"
+          size="sm"
+          variant="outline"
+          class="text-blue-600 border-blue-200 hover:bg-blue-50"
+          @click="$emit('assign-me', row.id)"
+        >
+          Asignarme
         </BaseButton>
       </div>
     </template>
@@ -52,7 +58,7 @@ import {
   formatTipoCaso,
   formatPrioridad,
   getTipoCasoColor,
-  getPrioridadColor
+  getPrioridadColor,
 } from '@/utils/helpers'
 import type { Caso } from '@/types'
 
@@ -62,12 +68,12 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  loading: false
+  loading: false,
 })
 
 defineEmits<{
   view: [id: number | string]
-  edit: [id: number | string]
+  'assign-me': [id: number | string]
 }>()
 
 const columns = [

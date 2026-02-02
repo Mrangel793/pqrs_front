@@ -72,7 +72,7 @@
           :casos="casosStore.casos"
           :loading="casosStore.loading"
           @view="handleView"
-          @edit="handleEdit"
+          @assign-me="handleAssignMe"
         />
 
         <BasePagination
@@ -159,8 +159,8 @@ function handleView(id: number | string) {
   router.push(`/casos/${id}`)
 }
 
-function handleEdit(id: number | string) {
-  router.push(`/casos/${id}/editar`)
+function handleAssignMe(id: number | string) {
+  casosStore.asignarme(id)
 }
 
 function handlePrevious() {
