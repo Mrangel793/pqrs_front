@@ -4,9 +4,7 @@
       <!-- Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900">Bandeja de Casos PQR</h1>
-        <BaseButton @click="router.push('/casos/nuevo')">
-          Nuevo Caso
-        </BaseButton>
+        <BaseButton @click="router.push('/casos/nuevo')"> Nuevo Caso </BaseButton>
       </div>
 
       <!-- Estadísticas Resumen -->
@@ -17,7 +15,9 @@
           </div>
           <div>
             <p class="text-xs text-gray-500">Total</p>
-            <p class="text-xl font-bold text-gray-900">{{ estadisticas?.totalCasos || casosStore.total || 0 }}</p>
+            <p class="text-xl font-bold text-gray-900">
+              {{ estadisticas?.totalCasos || casosStore.total || 0 }}
+            </p>
           </div>
         </div>
 
@@ -27,7 +27,9 @@
           </div>
           <div>
             <p class="text-xs text-gray-500">En Proceso</p>
-            <p class="text-xl font-bold text-yellow-600">{{ estadisticas?.casosPorEstado?.en_proceso || 0 }}</p>
+            <p class="text-xl font-bold text-yellow-600">
+              {{ estadisticas?.casosPorEstado?.en_proceso || 0 }}
+            </p>
           </div>
         </div>
 
@@ -37,7 +39,9 @@
           </div>
           <div>
             <p class="text-xs text-gray-500">Escalados</p>
-            <p class="text-xl font-bold text-red-600">{{ estadisticas?.casosPorEstado?.escalado || 0 }}</p>
+            <p class="text-xl font-bold text-red-600">
+              {{ estadisticas?.casosPorEstado?.escalado || 0 }}
+            </p>
           </div>
         </div>
 
@@ -47,13 +51,20 @@
           </div>
           <div>
             <p class="text-xs text-gray-500">Cerrados</p>
-            <p class="text-xl font-bold text-green-600">{{ estadisticas?.casosPorEstado?.cerrado || 0 }}</p>
+            <p class="text-xl font-bold text-green-600">
+              {{ estadisticas?.casosPorEstado?.cerrado || 0 }}
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Filtros -->
-      <CasoFilters v-model="filters" />
+      <CasoFilters
+        v-model="casosStore.activeFilters"
+        :tipos="casosStore.filtrosOptions.tipos"
+        :estados="casosStore.filtrosOptions.estados"
+        :prioridades="casosStore.filtrosOptions.prioridades"
+      />
 
       <!-- Tabla de Casos -->
       <BaseCard>
@@ -61,15 +72,15 @@
           :casos="casosStore.casos"
           :loading="casosStore.loading"
           @view="handleView"
-          @edit="handleEdit"
+          @assign-me="handleAssignMe"
         />
 
         <BasePagination
           v-if="casosStore.totalPages > 1"
-          :current-page="pagination.page"
+          :current-page="casosStore.paginationConfig.page"
           :total-pages="casosStore.totalPages"
           :total="casosStore.total"
-          :page-size="pagination.pageSize"
+          :page-size="casosStore.paginationConfig.pageSize"
           @previous="handlePrevious"
           @next="handleNext"
           @goto="handleGoToPage"
@@ -86,7 +97,7 @@ import {
   DocumentTextIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
 } from '@heroicons/vue/24/outline'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -101,15 +112,11 @@ import type { CasoFilters as ICasoFilters, ReporteEstadisticas } from '@/types'
 const router = useRouter()
 const casosStore = useCasosStore()
 
-const filters = ref<ICasoFilters>({})
-const pagination = ref({
-  page: 1,
-  pageSize: 10
-})
+// No local state for filters/pagination anymore
 const estadisticas = ref<ReporteEstadisticas | null>(null)
 
 async function loadCasos() {
-  await casosStore.listar(filters.value, pagination.value)
+  await casosStore.listar(casosStore.activeFilters, casosStore.paginationConfig)
 }
 
 async function loadEstadisticas() {
@@ -120,34 +127,55 @@ async function loadEstadisticas() {
   }
 }
 
-watch([filters, pagination], loadCasos, { deep: true })
+// Watcher para filtros: Reinicia a página 1 usando store state
+watch(
+  () => casosStore.activeFilters,
+  () => {
+    if (casosStore.paginationConfig.page === 1) {
+      loadCasos()
+    } else {
+      casosStore.paginationConfig.page = 1
+    }
+  },
+  { deep: true },
+)
+
+// Watcher para paginación: Recarga casos usando store state
+watch(
+  () => casosStore.paginationConfig,
+  () => {
+    loadCasos()
+  },
+  { deep: true },
+)
 
 onMounted(() => {
   loadCasos()
   loadEstadisticas()
+  casosStore.cargarFiltros()
 })
 
 function handleView(id: number | string) {
   router.push(`/casos/${id}`)
 }
 
-function handleEdit(id: number | string) {
-  router.push(`/casos/${id}/editar`)
+function handleAssignMe(id: number | string) {
+  casosStore.asignarme(id)
 }
 
 function handlePrevious() {
-  if (pagination.value.page > 1) {
-    pagination.value.page--
+  if (casosStore.paginationConfig.page > 1) {
+    casosStore.paginationConfig.page--
   }
 }
 
 function handleNext() {
-  if (pagination.value.page < casosStore.totalPages) {
-    pagination.value.page++
+  if (casosStore.paginationConfig.page < casosStore.totalPages) {
+    casosStore.paginationConfig.page++
   }
 }
 
 function handleGoToPage(page: number) {
-  pagination.value.page = page
+  casosStore.paginationConfig.page = page
 }
 </script>

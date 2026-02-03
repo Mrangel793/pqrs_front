@@ -15,7 +15,9 @@
             <div>
               <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold text-gray-900">Caso {{ caso.numero }}</h1>
-                <span class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                <span
+                  class="text-xs font-semibold uppercase tracking-wide text-gray-700 bg-gray-100 px-2 py-1 rounded"
+                >
                   {{ caso.codigoEstado || 'SIN ESTADO' }}
                 </span>
                 <SemaforoIndicator :semaforo="caso.semaforo" />
@@ -25,9 +27,13 @@
           </div>
 
           <div class="flex flex-wrap gap-2">
-            <BaseButton variant="secondary" @click="handleEdit">
-              <PencilIcon class="h-4 w-4 mr-1" />
-              Editar
+            <BaseButton
+              v-if="!caso.responsableId"
+              variant="outline"
+              class="text-blue-600 border-blue-200 hover:bg-blue-50"
+              @click="handleAssignMe"
+            >
+              Asignarme
             </BaseButton>
             <BaseButton variant="secondary" @click="showModalPDF = true">
               <DocumentArrowDownIcon class="h-4 w-4 mr-1" />
@@ -56,7 +62,7 @@
               activeTab === tab.id
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-              'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2'
+              'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
             ]"
           >
             <component :is="tab.icon" class="h-4 w-4" />
@@ -86,10 +92,7 @@
 
           <!-- Tab: PDF (RF-07) -->
           <template v-if="activeTab === 'pdf'">
-            <GestionPDF
-              :caso-id="route.params.id as string"
-              :caso-numero="caso?.numero || ''"
-            />
+            <GestionPDF :caso-id="route.params.id as string" :caso-numero="caso?.numero || ''" />
           </template>
 
           <!-- Tab: Adjuntos -->
@@ -108,17 +111,24 @@
                   class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <div
+                      class="shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center"
+                    >
                       <PaperClipIcon class="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
                       <p class="text-sm font-medium text-gray-900">{{ adjunto.nombre }}</p>
                       <p class="text-xs text-gray-500">
-                        {{ formatFileSize(adjunto.tamaño) }} - Subido {{ formatRelativeTime(adjunto.fecha) }}
+                        {{ formatFileSize(adjunto.tamaño) }} - Subido
+                        {{ formatRelativeTime(adjunto.fecha) }}
                       </p>
                     </div>
                   </div>
-                  <BaseButton size="sm" variant="secondary" @click="handleDownload(adjunto.id, adjunto.nombre)">
+                  <BaseButton
+                    size="sm"
+                    variant="secondary"
+                    @click="handleDownload(adjunto.id, adjunto.nombre)"
+                  >
                     <ArrowDownTrayIcon class="h-4 w-4 mr-1" />
                     Descargar
                   </BaseButton>
@@ -144,16 +154,26 @@
                 >
                   <div class="flex items-start justify-between mb-2">
                     <div class="flex items-center gap-2">
-                      <span class="text-xs text-gray-500">{{ formatDateTime(escalamiento.fechaEscalamiento) }}</span>
+                      <span class="text-xs text-gray-500">{{
+                        formatDateTime(escalamiento.fechaEscalamiento)
+                      }}</span>
                     </div>
                   </div>
                   <!-- Observación combinada -->
-                  <div class="text-sm text-gray-800 whitespace-pre-line mb-3">{{ escalamiento.observacion }}</div>
-                  
+                  <div class="text-sm text-gray-800 whitespace-pre-line mb-3">
+                    {{ escalamiento.observacion }}
+                  </div>
+
                   <div class="flex items-center gap-4 text-xs text-gray-500 border-t pt-2 mt-2">
-                    <span>De: <strong>{{ escalamiento.de_usuario?.nombre || 'Desconocido' }}</strong></span>
+                    <span
+                      >De:
+                      <strong>{{ escalamiento.de_usuario?.nombre || 'Desconocido' }}</strong></span
+                    >
                     <span class="text-gray-300">|</span>
-                    <span>Para: <strong>{{ escalamiento.a_usuario?.nombre || 'Desconocido' }}</strong></span>
+                    <span
+                      >Para:
+                      <strong>{{ escalamiento.a_usuario?.nombre || 'Desconocido' }}</strong></span
+                    >
                   </div>
                 </div>
               </div>
@@ -174,9 +194,7 @@
         description="El caso que buscas no existe o no tienes acceso"
       >
         <template #action>
-          <BaseButton @click="router.push('/casos')">
-            Volver a Casos
-          </BaseButton>
+          <BaseButton @click="router.push('/casos')"> Volver a Casos </BaseButton>
         </template>
       </BaseEmptyState>
     </div>
@@ -217,7 +235,7 @@ import {
   DocumentDuplicateIcon,
   ArrowUpCircleIcon,
   PencilSquareIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
 } from '@heroicons/vue/24/outline'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -260,30 +278,30 @@ const tabs = computed(() => [
   {
     id: 'info',
     name: 'Información',
-    icon: InformationCircleIcon
+    icon: InformationCircleIcon,
   },
   {
     id: 'respuesta',
     name: 'Respuesta',
-    icon: PencilSquareIcon
+    icon: PencilSquareIcon,
   },
   {
     id: 'pdf',
     name: 'PDF',
-    icon: DocumentTextIcon
+    icon: DocumentTextIcon,
   },
   {
     id: 'adjuntos',
     name: 'Adjuntos',
     icon: DocumentDuplicateIcon,
-    count: caso.value?.adjuntos?.length || 0
+    count: caso.value?.adjuntos?.length || 0,
   },
   {
     id: 'escalamientos',
     name: 'Escalamientos',
     icon: ArrowUpCircleIcon,
-    count: caso.value?.escalamientos?.length || 0
-  }
+    count: caso.value?.escalamientos?.length || 0,
+  },
 ])
 
 const pollingInterval = ref<number | null>(null)
@@ -291,7 +309,7 @@ const pollingInterval = ref<number | null>(null)
 onMounted(async () => {
   const id = route.params.id as string
   await loadData(id)
-  
+
   // Polling cada 30 segundos
   pollingInterval.value = window.setInterval(() => {
     loadData(id)
@@ -305,11 +323,7 @@ onUnmounted(() => {
 })
 
 async function loadData(id: string) {
-  await Promise.all([
-    casosStore.obtener(id),
-    fetchEscalamientos(id),
-    fetchHistorial(id)
-  ])
+  await Promise.all([casosStore.obtener(id), fetchEscalamientos(id), fetchHistorial(id)])
 }
 
 async function fetchEscalamientos(casoId: string) {
@@ -335,26 +349,36 @@ function mapAuditoriaToHistorial(evento: AuditoriaEvento): HistorialEvento {
   const tipoMap: Record<number, TipoEvento> = {
     1: 'creacion',
     2: 'cambio_estado',
-    3: 'cambio_estado', 
+    3: 'cambio_estado',
     4: 'escalamiento',
     5: 'asignacion', // Login (no usado aqui habitualmente)
-    6: 'cambio_estado', 
-    7: 'escalamiento' 
+    6: 'cambio_estado',
+    7: 'escalamiento',
   }
   return {
     id: evento.id,
     casoId: evento.casoId ? parseInt(evento.casoId) : 0,
     tipo: tipoMap[evento.tipoAccionId] || 'cambio_estado',
     descripcion: evento.tipo_accion?.descripcion || 'Evento',
-    usuario: evento.usuario || { id: 0, nombre: 'Sistema', email: '', rol: 'admin', activo: true, createdAt: '', updatedAt: '' },
+    usuario: evento.usuario || {
+      id: 0,
+      nombre: 'Sistema',
+      email: '',
+      rol: 'admin',
+      activo: true,
+      createdAt: '',
+      updatedAt: '',
+    },
     fecha: evento.fechaEvento,
-    metadata: evento.detalleJson ? JSON.parse(evento.detalleJson) : undefined
+    metadata: evento.detalleJson ? JSON.parse(evento.detalleJson) : undefined,
   }
 }
 
-function handleEdit() {
+async function handleAssignMe() {
   const id = route.params.id as string
-  router.push(`/casos/${id}/editar`)
+  await casosStore.asignarme(id)
+  await loadData(id)
+  toast.success('Te has asignado el caso exitosamente')
 }
 
 async function handleEscalado() {

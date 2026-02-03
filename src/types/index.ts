@@ -74,8 +74,8 @@ export interface CasoFormData {
 }
 
 export interface CasoFilters {
-  tipo?: TipoCaso
-  estado?: EstadoCaso
+  tipo?: string // Changed from TipoCaso to string to support dynamic values
+  estado?: number // Changed from EstadoCaso to number (ID) as backend expects ID
   prioridad?: Prioridad
   semaforoEstado?: EstadoSemaforo
   agenteAsignadoId?: number
@@ -83,6 +83,7 @@ export interface CasoFilters {
   fechaDesde?: string
   fechaHasta?: string
   busqueda?: string
+  radicado?: string
 }
 
 // Tipos de escalamientos

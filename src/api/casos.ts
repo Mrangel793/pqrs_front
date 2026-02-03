@@ -20,6 +20,22 @@ const api = USE_MOCK ? mockCasosApi : {
     const page = pagination?.page || 1
     const pageSize = pagination?.pageSize || 10
 
+    // Mapeo de filtros frontend -> backend
+    if (filters?.estado) {
+        params.estadoCasoId = filters.estado
+        delete params.estado
+    }
+    if (filters?.tipo) {
+        params.tipoTramite = filters.tipo
+        delete params.tipo
+    }
+
+
+    if (filters?.prioridad) {
+        params.semaforoId = filters.prioridad
+        delete params.prioridad
+    }
+    
     if (pagination) {
         params.page = page
         params.page_size = pageSize
@@ -87,6 +103,11 @@ const api = USE_MOCK ? mockCasosApi : {
     return this.actualizar(id, { agente_asignado_id: agenteId })
   },
 
+  async asignarme(id: number | string): Promise<Caso> {
+    const { data } = await apiClient.post<any>(`/casos/${id}/asignar-me`)
+    return adaptarCaso(data)
+  },
+
   async cambiarEstado(id: number, estado: string): Promise<Caso> {
     return this.actualizar(id, { estado })
   },
@@ -99,6 +120,15 @@ const api = USE_MOCK ? mockCasosApi : {
     // No hay endpoint de comentarios en Postman. 
     // Intentamos enviarlo como actualización o lo dejamos pendiente
     console.warn('Endpoint de comentarios no definido en Postman')
+  },
+
+  async obtenerFiltros(): Promise<{ 
+    tipos: string[], 
+    estados: { value: number, label: string, codigo: string }[],
+    prioridades: { value: number, label: string, codigo: string, color: string }[]
+  }> {
+    const { data } = await apiClient.get<any>('/casos/filtros')
+    return data
   }
 }
 
@@ -114,13 +144,13 @@ function adaptarCaso(data: any): Caso {
     descripcion: data.detalleSolicitud || '',
     estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto',
     codigoEstado: data.estadoCasoId?.codigo || data.estado_caso?.codigo || 'SIN ESTADO',
-    prioridad: data.prioridad || 'media',
     semaforo: data.semaforo || {
       codigo: 'VERDE',
       descripcion: 'A tiempo',
       colorHex: '#22c55e'
     },
     semaforoEstado: data.semaforo?.codigo?.toLowerCase() || 'verde',
+    prioridad: mapearPrioridad(data.semaforo?.codigo),
     fechaCreacion: data.createdAt || new Date().toISOString(),
     fechaRecepcion: data.fechaRecepcion || data.createdAt || new Date().toISOString(),
     fechaLimite: data.fechaVencimiento || new Date().toISOString(),
@@ -137,4 +167,15 @@ function adaptarCaso(data: any): Caso {
     escalamientos: data.escalamientos || [],
     historial: data.historial || []
   }
+}
+
+function mapearPrioridad(semaforoCodigo?: string): 'baja' | 'media' | 'alta' | 'critica' {
+  if (!semaforoCodigo) return 'media'
+  const map: Record<string, 'baja' | 'media' | 'alta' | 'critica'> = {
+    'VERDE': 'baja',
+    'AMARILLA': 'media',
+    'NARANJA': 'alta',
+    'ROJO': 'critica'
+  }
+  return map[semaforoCodigo] || 'media'
 }
