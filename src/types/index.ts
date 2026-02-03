@@ -286,11 +286,11 @@ export interface ImagenRespuesta {
 export type TipoPlantillaPDF = 'FACTURA' | 'POSTILLA' | 'FALLA'
 
 export interface PDFVersionInfo {
+  adjunto_id: string
   version: number
-  tipo_plantilla: TipoPlantillaPDF
-  fecha_generacion: string
-  generado_por: string
-  url_descarga: string
+  nombre_archivo: string
+  tamanio_bytes: number
+  created_at: string
 }
 
 export interface PDFGenerarRequest {

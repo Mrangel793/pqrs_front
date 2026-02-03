@@ -39,19 +39,6 @@
           </div>
         </div>
 
-        <!-- Texto adicional opcional -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Texto Adicional (opcional)
-          </label>
-          <textarea
-            v-model="textoAdicional"
-            rows="2"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
-            placeholder="Notas adicionales para incluir en el PDF..."
-          ></textarea>
-        </div>
-
         <!-- Botón de generar -->
         <div class="flex justify-end">
           <BaseButton
@@ -103,16 +90,16 @@
                   </span>
                   <span
                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                    :class="getPlantillaBadgeClass(version.tipo_plantilla)"
+                    :class="getPlantillaBadgeFromFilename(version.nombre_archivo)"
                   >
-                    {{ getPlantillaLabel(version.tipo_plantilla) }}
+                    {{ getPlantillaLabelFromFilename(version.nombre_archivo) }}
                   </span>
                 </div>
                 <p class="text-sm text-gray-500">
-                  {{ formatDateTime(version.fecha_generacion) }}
-                  <span v-if="version.generado_por">
-                    por {{ version.generado_por }}
-                  </span>
+                  {{ formatDateTime(version.created_at) }}
+                </p>
+                <p class="text-xs text-gray-400">
+                  {{ formatFileSize(version.tamanio_bytes) }}
                 </p>
               </div>
             </div>
@@ -238,7 +225,6 @@ const toast = useToast()
 
 // Estado
 const plantillaSeleccionada = ref<TipoPlantillaPDF | null>(null)
-const textoAdicional = ref('')
 const versiones = ref<PDFVersionInfo[]>([])
 const cargandoVersiones = ref(false)
 const generando = ref(false)
@@ -274,9 +260,13 @@ const plantillas = [
 async function cargarVersiones() {
   cargandoVersiones.value = true
   try {
-    versiones.value = await pdfApi.listarVersiones(props.casoId)
-  } catch {
+    const data = await pdfApi.listarVersiones(props.casoId)
+    versiones.value = Array.isArray(data) ? data : []
+    console.log('Versiones cargadas:', data)
+  } catch (error) {
+    console.error('Error cargando versiones:', error)
     toast.error('Error al cargar las versiones')
+    versiones.value = []
   } finally {
     cargandoVersiones.value = false
   }
@@ -290,11 +280,9 @@ async function generarPDF() {
   try {
     const resultado = await pdfApi.generar(
       props.casoId,
-      plantillaSeleccionada.value,
-      textoAdicional.value || undefined
+      plantillaSeleccionada.value
     )
     toast.success(`PDF versión ${resultado.version} generado correctamente`)
-    textoAdicional.value = ''
     // Recargar lista de versiones
     await cargarVersiones()
   } catch {
@@ -337,18 +325,24 @@ async function previewPDF(version: number) {
 }
 
 // Helpers para plantillas
-function getPlantillaLabel(tipo: TipoPlantillaPDF): string {
-  const plantilla = plantillas.find(p => p.value === tipo)
-  return plantilla?.label || tipo
+function getPlantillaLabelFromFilename(filename: string): string {
+  if (filename.includes('factura')) return 'Factura'
+  if (filename.includes('postilla') || filename.includes('apostilla')) return 'Postilla/Apostilla'
+  if (filename.includes('falla')) return 'Falla/No Disponibilidad'
+  return 'PDF'
 }
 
-function getPlantillaBadgeClass(tipo: TipoPlantillaPDF): string {
-  const classes: Record<TipoPlantillaPDF, string> = {
-    FACTURA: 'bg-green-100 text-green-800',
-    POSTILLA: 'bg-blue-100 text-blue-800',
-    FALLA: 'bg-red-100 text-red-800'
-  }
-  return classes[tipo] || 'bg-gray-100 text-gray-800'
+function getPlantillaBadgeFromFilename(filename: string): string {
+  if (filename.includes('factura')) return 'bg-green-100 text-green-800'
+  if (filename.includes('postilla') || filename.includes('apostilla')) return 'bg-blue-100 text-blue-800'
+  if (filename.includes('falla')) return 'bg-red-100 text-red-800'
+  return 'bg-gray-100 text-gray-800'
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 onMounted(() => {

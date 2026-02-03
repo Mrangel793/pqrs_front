@@ -2,59 +2,31 @@ import apiClient from './axios'
 import type { PDFVersionInfo, PDFGenerarResponse, TipoPlantillaPDF } from '@/types'
 
 export const pdfApi = {
-  // Metodo legacy mapeado a uno de los nuevos
-  async generarCaso(casoId: number | string): Promise<Blob> {
-    return this.generarPostilla(casoId.toString())
-  },
-
-  async generarFactura(numeroFactura: string, cliente: string): Promise<Blob> {
-    const { data } = await apiClient.post(
-      '/pdf/factura',
-      { numero_factura: numeroFactura, cliente },
-      { responseType: 'blob' }
-    )
-    return data
-  },
-
-  async generarPostilla(numeroCaso: string): Promise<Blob> {
-    const { data } = await apiClient.post(
-      '/pdf/postilla-apostilla',
-      { numero_caso: numeroCaso },
-      { responseType: 'blob' }
-    )
-    return data
-  },
-
-  async generarFalla(numeroCaso: string): Promise<Blob> {
-    const { data } = await apiClient.post(
-      '/pdf/falla-no-respuesta',
-      { numero_caso: numeroCaso },
-      { responseType: 'blob' }
-    )
-    return data
-  },
-
-  // RF-07: Nuevos endpoints con versionado
-
   /**
-   * Genera un nuevo PDF para el caso con plantilla institucional
-   * POST /pqrs/{id}/pdf/generar
+   * Genera un nuevo PDF para el caso
+   * POST /pqrs/{caso_id}/pdf/generar
    */
   async generar(
     casoId: number | string,
     tipoPlantilla: TipoPlantillaPDF,
-    textoAdicional?: string
+    incluirImagenes: boolean = true
   ): Promise<PDFGenerarResponse> {
+    const tipoPdfIdMap: Record<TipoPlantillaPDF, number> = {
+      FACTURA: 1,
+      POSTILLA: 2,
+      FALLA: 3
+    }
+
     const { data } = await apiClient.post(`/pqrs/${casoId}/pdf/generar`, {
-      tipo_plantilla: tipoPlantilla,
-      texto_adicional: textoAdicional
+      tipo_pdf_id: tipoPdfIdMap[tipoPlantilla],
+      incluir_imagenes: incluirImagenes
     })
     return data
   },
 
   /**
    * Obtiene el historial de versiones de PDF generados
-   * GET /pqrs/{id}/pdf/versiones
+   * GET /pqrs/{caso_id}/pdf/versiones
    */
   async listarVersiones(casoId: number | string): Promise<PDFVersionInfo[]> {
     const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/versiones`)
@@ -63,28 +35,52 @@ export const pdfApi = {
 
   /**
    * Descarga una versión específica del PDF
-   * GET /pqrs/{id}/pdf/{version}/descargar
+   * GET /pqrs/{caso_id}/pdf/descargar?version=X
    */
   async descargarVersion(casoId: number | string, version: number): Promise<Blob> {
-    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/${version}/descargar`, {
+    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/descargar`, {
+      params: { version },
       responseType: 'blob'
     })
     return data
   },
 
   /**
-   * Obtiene preview de una versión específica del PDF
-   * GET /pqrs/{id}/pdf/{version}/preview
+   * Descarga la última versión del PDF
+   * GET /pqrs/{caso_id}/pdf/descargar
    */
-  async previewVersion(casoId: number | string, version: number): Promise<Blob> {
-    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/${version}/preview`, {
+  async descargar(casoId: number | string): Promise<Blob> {
+    const { data } = await apiClient.get(`/pqrs/${casoId}/pdf/descargar`, {
       responseType: 'blob'
     })
     return data
   },
 
-  async generarReporte(tipo: string, filtros?: Record<string, any>): Promise<Blob> {
-    console.warn('Endpoint PDF Reporte no definido explicitamente')
-    return new Blob([])
+  /**
+   * Preview de una versión específica (usa el mismo endpoint de descarga)
+   * GET /pqrs/{caso_id}/pdf/descargar?version=X
+   */
+  async previewVersion(casoId: number | string, version: number): Promise<Blob> {
+    return this.descargarVersion(casoId, version)
+  },
+
+  /**
+   * Genera un PDF y lo descarga inmediatamente
+   * Retorna el Blob para usar con useDownload
+   */
+  async generarYDescargar(
+    casoId: number | string,
+    tipoPlantilla: TipoPlantillaPDF = 'POSTILLA',
+    incluirImagenes: boolean = true
+  ): Promise<Blob> {
+    // Primero generar
+    const resultado = await this.generar(casoId, tipoPlantilla, incluirImagenes)
+    // Luego descargar la versión generada
+    return this.descargarVersion(casoId, resultado.version)
+  },
+
+  // Alias para compatibilidad (retorna Blob para useDownload)
+  async generarCaso(casoId: number | string, tipoPlantilla: TipoPlantillaPDF = 'POSTILLA'): Promise<Blob> {
+    return this.generarYDescargar(casoId, tipoPlantilla)
   }
 }
