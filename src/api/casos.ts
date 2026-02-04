@@ -142,14 +142,14 @@ function adaptarCaso(data: any): Caso {
     tipo: data.tipoTramite?.toLowerCase() || 'peticion',
     titulo: data.detalleSolicitud ? data.detalleSolicitud.substring(0, 50) + '...' : 'Sin Título',
     descripcion: data.detalleSolicitud || '',
-    estado: data.estado_caso?.nombre?.toLowerCase().replace(' ', '_') || 'abierto',
-    codigoEstado: data.estadoCasoId?.codigo || data.estado_caso?.codigo || 'SIN ESTADO',
+    estado: (data.estado_caso?.codigo || 'NUEVO') as any, // Cast to any/EstadoCaso to avoid type overlap issues during transition
+    codigoEstado: data.estado_caso?.codigo || 'SIN ESTADO',
     semaforo: data.semaforo || {
       codigo: 'VERDE',
       descripcion: 'A tiempo',
       colorHex: '#22c55e'
     },
-    semaforoEstado: data.semaforo?.codigo?.toLowerCase() || 'verde',
+    semaforoEstado: (data.semaforo?.codigo || 'VERDE') as any,
     prioridad: mapearPrioridad(data.semaforo?.codigo),
     fechaCreacion: data.createdAt || new Date().toISOString(),
     fechaRecepcion: data.fechaRecepcion || data.createdAt || new Date().toISOString(),

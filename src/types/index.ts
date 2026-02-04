@@ -22,9 +22,10 @@ export interface AuthResponse {
 
 // Tipos de casos PQR
 export type TipoCaso = 'peticion' | 'queja' | 'reclamo' | 'sugerencia'
-export type EstadoCaso = 'abierto' | 'en_proceso' | 'escalado' | 'cerrado' | 'pendiente'
+// Backend devuelve códigos en mayúsculas
+export type EstadoCaso = 'NUEVO' | 'EN_GESTION' | 'ESCALADO' | 'CERRADO' | 'LISTO_PDF' | 'ENVIADO_ENTIDAD' | 'INCOMPLETO' | 'ERROR_ENVIO' 
 export type Prioridad = 'baja' | 'media' | 'alta' | 'critica'
-export type EstadoSemaforo = 'verde' | 'amarillo' | 'rojo'
+export type EstadoSemaforo = 'VERDE' | 'AMARILLA' | 'NARANJA' | 'ROJO'
 
 export interface Semaforo {
   codigo: string
