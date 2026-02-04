@@ -15,8 +15,15 @@ export interface LoginCredentials {
   password: string
 }
 
+// Token response structure from backend
+export interface TokenResponse {
+  access_token: string
+  refresh_token: string
+  token_type: string
+}
+
 export interface AuthResponse {
-  token: string
+  token: TokenResponse
   usuario: Usuario
 }
 

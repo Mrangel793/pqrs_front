@@ -6,6 +6,7 @@ import type { Usuario, LoginCredentials } from '@/types'
 export const useAuthStore = defineStore('auth', () => {
   const usuario = ref<Usuario | null>(null)
   const token = ref<string | null>(localStorage.getItem('auth_token'))
+  const refreshToken = ref<string | null>(localStorage.getItem('refresh_token'))
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -20,9 +21,18 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
       const response = await authApi.login(credentials)
-      token.value = response.token
+      
+      // Guardar tokens
+      token.value = response.token.access_token
+      refreshToken.value = response.token.refresh_token
       usuario.value = response.usuario
-      localStorage.setItem('auth_token', response.token)
+      
+      // Persistir en localStorage
+      localStorage.setItem('auth_token', response.token.access_token)
+      if (response.token.refresh_token) {
+        localStorage.setItem('refresh_token', response.token.refresh_token)
+      }
+      
       return true
     } catch (err: any) {
       if (err.response?.status === 401) {
@@ -30,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
       } else if (!err.response) {
         error.value = 'Error de conexión con el servidor'
       } else {
-        error.value = err.response?.data?.message || 'Error al iniciar sesión'
+        error.value = err.response?.data?.detail || err.response?.data?.message || 'Error al iniciar sesión'
       }
       return false
     } finally {
@@ -40,14 +50,27 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
+      // Llamar al endpoint de logout para invalidar sesión en backend
       await authApi.logout()
     } catch (err) {
-      console.error('Error al cerrar sesión:', err)
+      // Ignorar error si falla - igual limpiamos localmente
+      console.error('Error al cerrar sesión en servidor:', err)
     } finally {
-      token.value = null
-      usuario.value = null
-      localStorage.removeItem('auth_token')
+      // Siempre limpiar estado local
+      clearLocalSession()
     }
+  }
+
+  /**
+   * Limpiar sesión local sin llamar al backend
+   * Útil cuando el token ya expiró y logout fallaría
+   */
+  function clearLocalSession() {
+    token.value = null
+    refreshToken.value = null
+    usuario.value = null
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('refresh_token')
   }
 
   async function fetchProfile() {
@@ -56,9 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
       usuario.value = await authApi.getProfile()
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Error al obtener perfil'
-      if (err.response?.status === 401) {
-        await logout()
-      }
+      // Si es 401, el interceptor de axios ya manejará el refresh o redirect
     } finally {
       loading.value = false
     }
@@ -92,18 +113,39 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Inicializar store al cargar la app
+   * Verifica si hay tokens guardados y carga el perfil
+   */
+  async function initialize() {
+    if (token.value) {
+      try {
+        await fetchProfile()
+      } catch (err) {
+        // Si falla, el interceptor manejará el refresh o limpiará la sesión
+        console.error('Error al inicializar sesión:', err)
+      }
+    }
+  }
+
   return {
+    // State
     usuario,
     token,
+    refreshToken,
     loading,
     error,
+    // Getters
     isAuthenticated,
     isAdmin,
     isSupervisor,
+    // Actions
     login,
     logout,
+    clearLocalSession,
     fetchProfile,
     updateProfile,
-    changePassword
+    changePassword,
+    initialize
   }
 })
