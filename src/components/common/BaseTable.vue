@@ -30,7 +30,12 @@
             />
           </td>
         </tr>
-        <tr v-else v-for="(row, index) in data" :key="index" class="hover:bg-gray-50">
+        <tr
+          v-else
+          v-for="(row, index) in data"
+          :key="index"
+          :class="['hover:bg-gray-50', rowClass ? rowClass(row) : '']"
+        >
           <td
             v-for="column in columns"
             :key="column.key"
@@ -62,9 +67,11 @@ interface Props {
   columns: Column[]
   data: T[]
   loading?: boolean
+  rowClass?: (row: T) => string
 }
 
 withDefaults(defineProps<Props>(), {
-  loading: false
+  loading: false,
+  rowClass: undefined
 })
 </script>
