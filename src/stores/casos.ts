@@ -125,8 +125,13 @@ export const useCasosStore = defineStore('casos', () => {
 
       return casoActualizado
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Error al actualizar caso'
-      return null
+      // Detectar si es un error 409 (caso vencido)
+      if (err.response?.status === 409) {
+        error.value = err.response?.data?.detail || 'Este caso se encuentra vencido. No se permiten acciones operativas.'
+      } else {
+        error.value = err.response?.data?.message || 'Error al actualizar caso'
+      }
+      throw err // Re-lanzar para que los componentes puedan manejarlo
     } finally {
       loading.value = false
     }
@@ -191,8 +196,13 @@ export const useCasosStore = defineStore('casos', () => {
 
       return casoActualizado
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Error al auto-asignar caso'
-      return null
+      // Detectar si es un error 409 (caso vencido)
+      if (err.response?.status === 409) {
+        error.value = err.response?.data?.detail || 'Este caso se encuentra vencido. No se permiten acciones operativas.'
+      } else {
+        error.value = err.response?.data?.message || 'Error al auto-asignar caso'
+      }
+      throw err // Re-lanzar para que los componentes puedan manejarlo
     } finally {
       loading.value = false
     }

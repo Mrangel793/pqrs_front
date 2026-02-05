@@ -5,9 +5,7 @@
       <div class="space-y-4">
         <!-- Selector de plantilla -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Tipo de Plantilla
-          </label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"> Tipo de Plantilla </label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               v-for="plantilla in plantillas"
@@ -17,16 +15,14 @@
                 'relative flex flex-col items-center p-4 border-2 rounded-lg transition-all',
                 plantillaSeleccionada === plantilla.value
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-300',
               ]"
             >
               <component
                 :is="plantilla.icon"
                 :class="[
                   'h-8 w-8 mb-2',
-                  plantillaSeleccionada === plantilla.value
-                    ? 'text-blue-600'
-                    : 'text-gray-400'
+                  plantillaSeleccionada === plantilla.value ? 'text-blue-600' : 'text-gray-400',
                 ]"
               />
               <span class="text-sm font-medium text-gray-900">
@@ -44,7 +40,10 @@
           <BaseButton
             variant="primary"
             @click="generarPDF"
-            :disabled="generando || !plantillaSeleccionada"
+            :disabled="generando || !plantillaSeleccionada || isVencido"
+            :title="
+              isVencido ? 'Este caso se encuentra vencido. No se permiten acciones operativas.' : ''
+            "
           >
             <template v-if="generando">
               <ArrowPathIcon class="h-4 w-4 mr-2 animate-spin" />
@@ -66,28 +65,21 @@
       </div>
 
       <div v-else-if="versiones.length === 0">
-        <BaseEmptyState
-          title="Sin versiones"
-          description="No hay PDFs generados para este caso"
-        />
+        <BaseEmptyState title="Sin versiones" description="No hay PDFs generados para este caso" />
       </div>
 
       <div v-else class="divide-y">
-        <div
-          v-for="version in versiones"
-          :key="version.version"
-          class="py-4 first:pt-0 last:pb-0"
-        >
+        <div v-for="version in versiones" :key="version.version" class="py-4 first:pt-0 last:pb-0">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
+              <div
+                class="shrink-0 w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center"
+              >
                 <DocumentIcon class="h-6 w-6 text-red-600" />
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="font-medium text-gray-900">
-                    Versión {{ version.version }}
-                  </span>
+                  <span class="font-medium text-gray-900"> Versión {{ version.version }} </span>
                   <span
                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                     :class="getPlantillaBadgeFromFilename(version.nombre_archivo)"
@@ -154,13 +146,14 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                <DialogTitle class="text-lg font-medium text-gray-900 flex items-center justify-between mb-4">
+              <DialogPanel
+                class="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+              >
+                <DialogTitle
+                  class="text-lg font-medium text-gray-900 flex items-center justify-between mb-4"
+                >
                   <span>Vista Previa - Versión {{ versionPreview }}</span>
-                  <button
-                    @click="showPreview = false"
-                    class="text-gray-400 hover:text-gray-500"
-                  >
+                  <button @click="showPreview = false" class="text-gray-400 hover:text-gray-500">
                     <XMarkIcon class="h-6 w-6" />
                   </button>
                 </DialogTitle>
@@ -187,13 +180,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-  TransitionChild,
-  TransitionRoot
-} from '@headlessui/vue'
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
   DocumentArrowDownIcon,
   DocumentIcon,
@@ -203,7 +190,7 @@ import {
   XMarkIcon,
   DocumentTextIcon,
   ReceiptPercentIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
 } from '@heroicons/vue/24/outline'
 import BaseCard from '@/components/common/BaseCard.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -217,9 +204,12 @@ import type { PDFVersionInfo, TipoPlantillaPDF } from '@/types'
 interface Props {
   casoId: string | number
   casoNumero: string
+  isVencido?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  isVencido: false,
+})
 
 const toast = useToast()
 
@@ -240,20 +230,20 @@ const plantillas = [
     value: 'FACTURA' as TipoPlantillaPDF,
     label: 'Factura',
     descripcion: 'Documento de facturación',
-    icon: ReceiptPercentIcon
+    icon: ReceiptPercentIcon,
   },
   {
     value: 'POSTILLA' as TipoPlantillaPDF,
     label: 'Postilla/Apostilla',
     descripcion: 'Certificación de documento',
-    icon: DocumentTextIcon
+    icon: DocumentTextIcon,
   },
   {
     value: 'FALLA' as TipoPlantillaPDF,
     label: 'Falla/No Disponibilidad',
     descripcion: 'Reporte de indisponibilidad',
-    icon: ExclamationCircleIcon
-  }
+    icon: ExclamationCircleIcon,
+  },
 ]
 
 // Cargar versiones
@@ -278,10 +268,7 @@ async function generarPDF() {
 
   generando.value = true
   try {
-    const resultado = await pdfApi.generar(
-      props.casoId,
-      plantillaSeleccionada.value
-    )
+    const resultado = await pdfApi.generar(props.casoId, plantillaSeleccionada.value)
     toast.success(`PDF versión ${resultado.version} generado correctamente`)
     // Recargar lista de versiones
     await cargarVersiones()
@@ -334,7 +321,8 @@ function getPlantillaLabelFromFilename(filename: string): string {
 
 function getPlantillaBadgeFromFilename(filename: string): string {
   if (filename.includes('factura')) return 'bg-green-100 text-green-800'
-  if (filename.includes('postilla') || filename.includes('apostilla')) return 'bg-blue-100 text-blue-800'
+  if (filename.includes('postilla') || filename.includes('apostilla'))
+    return 'bg-blue-100 text-blue-800'
   if (filename.includes('falla')) return 'bg-red-100 text-red-800'
   return 'bg-gray-100 text-gray-800'
 }

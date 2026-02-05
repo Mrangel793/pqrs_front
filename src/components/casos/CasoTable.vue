@@ -34,7 +34,7 @@
       <div class="flex gap-2">
         <BaseButton size="sm" variant="ghost" @click="$emit('view', row.id)"> Ver </BaseButton>
         <BaseButton
-          v-if="!row.responsableId"
+          v-if="!row.responsableId && row.codigoEstado !== 'VENCIDO'"
           size="sm"
           variant="outline"
           class="text-blue-600 border-blue-200 hover:bg-blue-50"
