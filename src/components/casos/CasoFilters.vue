@@ -1,5 +1,12 @@
 <template>
-  <BaseCard title="Filtros">
+  <BaseCard>
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
+        <CasoSortSelect :model-value="sortBy" @update:model-value="handleSortChange" />
+      </div>
+    </template>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <BaseInput
         v-model="localFilters.busqueda"
@@ -59,6 +66,7 @@ import BaseCard from '@/components/common/BaseCard.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import CasoSortSelect from '@/components/casos/CasoSortSelect.vue'
 import { debounce } from '@/utils/helpers'
 import type { CasoFilters } from '@/types'
 
@@ -67,16 +75,19 @@ interface Props {
   tipos: string[]
   estados: { value: number; label: string }[]
   prioridades: { value: number; label: string; color: string }[]
+  sortBy: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   tipos: () => [],
   estados: () => [],
   prioridades: () => [],
+  sortBy: 'mas_recientes',
 })
 
 const emit = defineEmits<{
   'update:modelValue': [value: CasoFilters]
+  'update:sortBy': [value: string]
 }>()
 
 const localFilters = ref<CasoFilters>({ ...props.modelValue })
@@ -112,6 +123,10 @@ function emitFilters() {
 }
 
 const debouncedEmit = debounce(emitFilters, 500)
+
+function handleSortChange(value: string) {
+  emit('update:sortBy', value)
+}
 
 function clearFilters() {
   localFilters.value = {} as CasoFilters

@@ -4,26 +4,17 @@
       <!-- Barra de estado -->
       <div class="flex items-center justify-between text-sm">
         <div class="flex items-center gap-2">
-          <span
-            v-if="guardando"
-            class="inline-flex items-center gap-1 text-blue-600"
-          >
+          <span v-if="guardando" class="inline-flex items-center gap-1 text-blue-600">
             <ArrowPathIcon class="h-4 w-4 animate-spin" />
             Guardando...
           </span>
-          <span
-            v-else-if="ultimaModificacion"
-            class="text-gray-500"
-          >
+          <span v-else-if="ultimaModificacion" class="text-gray-500">
             Última modificación: {{ formatRelativeTime(ultimaModificacion) }}
             <span v-if="modificadoPor"> por {{ modificadoPor }}</span>
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <span
-            v-if="tieneCambiosSinGuardar"
-            class="text-amber-600 text-xs"
-          >
+          <span v-if="tieneCambiosSinGuardar" class="text-amber-600 text-xs">
             Cambios sin guardar
           </span>
         </div>
@@ -47,7 +38,8 @@
           Notas Internas (opcional)
         </label>
         <p class="text-xs text-gray-500 mb-2">
-          Estas notas son solo para uso interno y no aparecerán en el PDF ni en la respuesta al usuario.
+          Estas notas son solo para uso interno y no aparecerán en el PDF ni en la respuesta al
+          usuario.
         </p>
         <textarea
           v-model="textoAdicional"
@@ -80,18 +72,17 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <BaseButton
-            variant="secondary"
-            @click="cargarRespuesta"
-            :disabled="cargando"
-          >
+          <BaseButton variant="secondary" @click="cargarRespuesta" :disabled="cargando">
             <ArrowPathIcon class="h-4 w-4 mr-1" />
             Recargar
           </BaseButton>
           <BaseButton
             variant="primary"
             @click="guardarBorrador"
-            :disabled="guardando || !tieneCambiosSinGuardar"
+            :disabled="guardando || !tieneCambiosSinGuardar || isVencido"
+            :title="
+              isVencido ? 'Este caso se encuentra vencido. No se permiten acciones operativas.' : ''
+            "
           >
             <DocumentCheckIcon class="h-4 w-4 mr-1" />
             Guardar Borrador
@@ -106,11 +97,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import {
-  ArrowPathIcon,
-  PhotoIcon,
-  DocumentCheckIcon
-} from '@heroicons/vue/24/outline'
+import { ArrowPathIcon, PhotoIcon, DocumentCheckIcon } from '@heroicons/vue/24/outline'
 import BaseCard from '@/components/common/BaseCard.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { respuestasApi } from '@/api/respuestas'
@@ -119,9 +106,12 @@ import { useToast } from '@/composables/useToast'
 
 interface Props {
   casoId: string | number
+  isVencido?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  isVencido: false,
+})
 const emit = defineEmits<{
   saved: []
 }>()
@@ -156,10 +146,10 @@ const editorOptions = {
       [{ list: 'ordered' }, { list: 'bullet' }],
       [{ header: [1, 2, 3, false] }],
       ['link', 'image'],
-      ['clean']
-    ]
+      ['clean'],
+    ],
   },
-  placeholder: 'Escribe la respuesta al caso aquí...'
+  placeholder: 'Escribe la respuesta al caso aquí...',
 }
 
 // Cargar respuesta existente
@@ -190,7 +180,7 @@ async function guardarBorrador() {
   try {
     const respuesta = await respuestasApi.guardar(props.casoId, {
       texto_html: contenidoHtml.value,
-      texto_adicional: textoAdicional.value || undefined
+      texto_adicional: textoAdicional.value || undefined,
     })
     contenidoOriginal.value = contenidoHtml.value
     textoAdicionalOriginal.value = textoAdicional.value
@@ -283,9 +273,9 @@ onBeforeUnmount(() => {
 defineExpose({
   getContenido: () => ({
     texto_html: contenidoHtml.value,
-    texto_adicional: textoAdicional.value
+    texto_adicional: textoAdicional.value,
   }),
-  tieneCambiosSinGuardar: () => tieneCambiosSinGuardar.value
+  tieneCambiosSinGuardar: () => tieneCambiosSinGuardar.value,
 })
 </script>
 

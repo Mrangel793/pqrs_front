@@ -28,22 +28,49 @@
 
           <div class="flex flex-wrap gap-2">
             <BaseButton
-              v-if="!caso.responsableId"
+              v-if="!caso.responsableId && !isCasoVencido"
               variant="outline"
               class="text-blue-600 border-blue-200 hover:bg-blue-50"
               @click="handleAssignMe"
             >
               Asignarme
             </BaseButton>
-            <BaseButton variant="secondary" @click="showModalPDF = true">
+            <BaseButton
+              variant="secondary"
+              :disabled="isCasoVencido"
+              :title="
+                isCasoVencido
+                  ? 'Este caso se encuentra vencido. No se permiten acciones operativas.'
+                  : ''
+              "
+              @click="showModalPDF = true"
+            >
               <DocumentArrowDownIcon class="h-4 w-4 mr-1" />
               PDF
             </BaseButton>
-            <BaseButton variant="secondary" @click="showModalEnvio = true">
+            <BaseButton
+              variant="secondary"
+              :disabled="isCasoVencido"
+              :title="
+                isCasoVencido
+                  ? 'Este caso se encuentra vencido. No se permiten acciones operativas.'
+                  : ''
+              "
+              @click="showModalEnvio = true"
+            >
               <EnvelopeIcon class="h-4 w-4 mr-1" />
               Notificar
             </BaseButton>
-            <BaseButton variant="danger" @click="showModalEscalar = true">
+            <BaseButton
+              variant="danger"
+              :disabled="isCasoVencido"
+              :title="
+                isCasoVencido
+                  ? 'Este caso se encuentra vencido. No se permiten acciones operativas.'
+                  : ''
+              "
+              @click="showModalEscalar = true"
+            >
               <ExclamationTriangleIcon class="h-4 w-4 mr-1" />
               Escalar
             </BaseButton>
@@ -87,12 +114,16 @@
 
           <!-- Tab: Respuesta (RF-06) -->
           <template v-if="activeTab === 'respuesta'">
-            <EditorRespuesta :caso-id="route.params.id as string" />
+            <EditorRespuesta :caso-id="route.params.id as string" :is-vencido="isCasoVencido" />
           </template>
 
           <!-- Tab: PDF (RF-07) -->
           <template v-if="activeTab === 'pdf'">
-            <GestionPDF :caso-id="route.params.id as string" :caso-numero="caso?.numero || ''" />
+            <GestionPDF
+              :caso-id="route.params.id as string"
+              :caso-numero="caso?.numero || ''"
+              :is-vencido="isCasoVencido"
+            />
           </template>
 
           <!-- Tab: Adjuntos -->
@@ -273,6 +304,11 @@ const escalamientos = ref<Escalamiento[]>([])
 const historialEventos = ref<HistorialEvento[]>([])
 
 const caso = computed(() => casosStore.casoActual)
+
+// Detectar si el caso está vencido (estado terminal operativo)
+const isCasoVencido = computed(() => {
+  return caso.value?.codigoEstado === 'VENCIDO'
+})
 
 const tabs = computed(() => [
   {

@@ -4,7 +4,15 @@
       <!-- Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900">Bandeja de Casos PQR</h1>
-        <BaseButton @click="router.push('/casos/nuevo')"> Nuevo Caso </BaseButton>
+        <BaseButton
+          @click="handleSyncBandeja"
+          :loading="isSyncing"
+          :disabled="isSyncing"
+          variant="primary"
+        >
+          <ArrowPathIcon class="h-5 w-5 mr-2" :class="{ 'animate-spin': isSyncing }" />
+          Actualizar
+        </BaseButton>
       </div>
 
       <!-- Estadísticas Resumen -->
@@ -26,9 +34,9 @@
             <ClockIcon class="h-5 w-5 text-yellow-600" />
           </div>
           <div>
-            <p class="text-xs text-gray-500">En Proceso</p>
+            <p class="text-xs text-gray-500">En Gestión</p>
             <p class="text-xl font-bold text-yellow-600">
-              {{ estadisticas?.casosPorEstado?.en_proceso || 0 }}
+              {{ estadisticas?.casosPorEstado?.EN_GESTION || 0 }}
             </p>
           </div>
         </div>
@@ -40,7 +48,7 @@
           <div>
             <p class="text-xs text-gray-500">Escalados</p>
             <p class="text-xl font-bold text-red-600">
-              {{ estadisticas?.casosPorEstado?.escalado || 0 }}
+              {{ estadisticas?.casosPorEstado?.ESCALADO || 0 }}
             </p>
           </div>
         </div>
@@ -52,18 +60,20 @@
           <div>
             <p class="text-xs text-gray-500">Cerrados</p>
             <p class="text-xl font-bold text-green-600">
-              {{ estadisticas?.casosPorEstado?.cerrado || 0 }}
+              {{ estadisticas?.casosPorEstado?.CERRADO || 0 }}
             </p>
           </div>
         </div>
       </div>
 
-      <!-- Filtros -->
+      <!-- Filtros y Ordenamiento -->
       <CasoFilters
         v-model="casosStore.activeFilters"
         :tipos="casosStore.filtrosOptions.tipos"
         :estados="casosStore.filtrosOptions.estados"
         :prioridades="casosStore.filtrosOptions.prioridades"
+        :sort-by="casosStore.paginationConfig.sortBy || 'mas_recientes'"
+        @update:sort-by="(val) => (casosStore.paginationConfig.sortBy = val)"
       />
 
       <!-- Tabla de Casos -->
@@ -98,6 +108,7 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
+  ArrowPathIcon,
 } from '@heroicons/vue/24/outline'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -114,6 +125,8 @@ const casosStore = useCasosStore()
 
 // No local state for filters/pagination anymore
 const estadisticas = ref<ReporteEstadisticas | null>(null)
+const isSyncing = ref(false)
+const syncError = ref<string | null>(null)
 
 async function loadCasos() {
   await casosStore.listar(casosStore.activeFilters, casosStore.paginationConfig)
@@ -121,7 +134,11 @@ async function loadCasos() {
 
 async function loadEstadisticas() {
   try {
-    estadisticas.value = await reportesApi.obtenerEstadisticas()
+    console.log('DEBUG: Llamando a reportesApi.obtenerEstadisticas()')
+    const result = await reportesApi.obtenerEstadisticas()
+    console.log('DEBUG: Respuesta recibida:', result)
+    console.log('DEBUG: casos_por_estado:', result.casosPorEstado)
+    estadisticas.value = result
   } catch (error) {
     console.error('Error al cargar estadísticas:', error)
   }
@@ -177,5 +194,26 @@ function handleNext() {
 
 function handleGoToPage(page: number) {
   casosStore.paginationConfig.page = page
+}
+
+async function handleSyncBandeja() {
+  try {
+    isSyncing.value = true
+    syncError.value = null
+
+    // Re-ejecutar la carga de casos con los filtros y paginación actuales
+    await loadCasos()
+
+    // También actualizar las estadísticas
+    await loadEstadisticas()
+  } catch (error: any) {
+    syncError.value = error.response?.data?.message || 'Error al sincronizar la bandeja'
+    console.error('Error al sincronizar bandeja:', error)
+
+    // Mostrar feedback visual discreto (puedes integrar un toast aquí si existe)
+    // Por ahora, el error se guarda en syncError.value para futuro uso
+  } finally {
+    isSyncing.value = false
+  }
 }
 </script>
