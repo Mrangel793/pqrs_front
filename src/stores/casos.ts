@@ -31,7 +31,7 @@ export const useCasosStore = defineStore('casos', () => {
   const paginationConfig = ref<PaginationParams>({
     page: 1,
     pageSize: 10,
-    sortBy: 'fechaRecepcion',
+    sortBy: 'mas_recientes',
     sortOrder: 'desc'
   })
 
@@ -40,7 +40,7 @@ export const useCasosStore = defineStore('casos', () => {
     paginationConfig.value = {
         page: 1,
         pageSize: 10,
-        sortBy: 'fechaRecepcion',
+        sortBy: 'mas_recientes',
         sortOrder: 'desc'
     }
     // Opcional: recargar

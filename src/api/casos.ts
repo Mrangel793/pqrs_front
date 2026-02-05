@@ -41,33 +41,18 @@ const api = USE_MOCK ? mockCasosApi : {
         params.page_size = pageSize
     }
 
-    // Ordenamiento: más recientes primero
-    // Enviamos múltiples formatos para asegurar que el backend lo entienda
-    params.sort_by = pagination?.sortBy || 'fechaRecepcion'
-    params.sortBy = pagination?.sortBy || 'fechaRecepcion'
-    
-    // Dirección: descendente
-    const direction = pagination?.sortOrder === 'asc' ? 'asc' : 'desc'
-    params.sort_order = direction
-    params.order = direction
-    params.direction = direction
-    
-    // Alternativa común en backends (Django style)
-    params.ordering = direction === 'desc' ? '-fechaRecepcion' : 'fechaRecepcion'
+    // Ordenamiento: enviar parámetro único al backend
+    params.sort_by = pagination?.sortBy || 'mas_recientes'
+    params.sort_order = pagination?.sortOrder || 'desc'
 
     // Backend devuelve { total: number, items: [...] }
     const { data: backendResponse } = await apiClient.get<any>('/casos/', {
       params
     })
 
-    let itemsAdaptados = (backendResponse.items || []).map(adaptarCaso)
+    const itemsAdaptados = (backendResponse.items || []).map(adaptarCaso)
 
-    // Ordenar en frontend como fallback (más recientes primero)
-    itemsAdaptados.sort((a: Caso, b: Caso) => {
-      const dateA = new Date(a.fechaRecepcion).getTime()
-      const dateB = new Date(b.fechaRecepcion).getTime()
-      return dateB - dateA // Descendente: más reciente primero
-    })
+    // Ya no ordenamos en frontend - el backend maneja el orden
 
     return {
       data: itemsAdaptados,

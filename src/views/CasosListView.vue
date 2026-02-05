@@ -66,12 +66,14 @@
         </div>
       </div>
 
-      <!-- Filtros -->
+      <!-- Filtros y Ordenamiento -->
       <CasoFilters
         v-model="casosStore.activeFilters"
         :tipos="casosStore.filtrosOptions.tipos"
         :estados="casosStore.filtrosOptions.estados"
         :prioridades="casosStore.filtrosOptions.prioridades"
+        :sort-by="casosStore.paginationConfig.sortBy || 'mas_recientes'"
+        @update:sort-by="(val) => (casosStore.paginationConfig.sortBy = val)"
       />
 
       <!-- Tabla de Casos -->
