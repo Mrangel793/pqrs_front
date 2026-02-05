@@ -25,13 +25,13 @@ export const respuestasApi = {
 
   /**
    * Sube una imagen para incrustar en la respuesta
-   * POST /pqrs/{id}/respuesta/imagen
+   * POST /pqrs/{id}/respuesta/imagenes
    */
   async subirImagen(casoId: number | string, archivo: File): Promise<ImagenRespuesta> {
     const formData = new FormData()
-    formData.append('archivo', archivo)
+    formData.append('file', archivo)
 
-    const { data } = await apiClient.post(`/pqrs/${casoId}/respuesta/imagen`, formData, {
+    const { data } = await apiClient.post(`/pqrs/${casoId}/respuesta/imagenes`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
