@@ -1,5 +1,5 @@
 <template>
-  <BaseTable :columns="columns" :data="casos" :loading="loading">
+  <BaseTable :columns="columns" :data="casos" :loading="loading" :row-class="getRowClass">
     <template #cell-numero="{ value }">
       <span class="font-mono text-sm">{{ value }}</span>
     </template>
@@ -85,4 +85,20 @@ const columns = [
   // { key: 'fechaRecepcion', label: 'Fecha' },
   // { key: 'agenteAsignado', label: 'Agente' }
 ]
+
+// RF-04: Resaltado visual de filas según semáforo
+function getRowClass(row: Caso): string {
+  const codigo = row.semaforo?.codigo?.toUpperCase()
+
+  switch (codigo) {
+    case 'ROJO':
+      return 'bg-red-50 border-l-4 border-red-500'
+    case 'NARANJA':
+      return 'bg-orange-50 border-l-4 border-orange-400'
+    case 'AMARILLA':
+      return 'bg-yellow-50 border-l-4 border-yellow-400'
+    default:
+      return ''
+  }
+}
 </script>

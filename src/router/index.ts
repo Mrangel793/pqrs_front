@@ -43,6 +43,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/alertas',
+      name: 'alertas',
+      component: () => import('@/views/AlertasView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/auditoria',
       name: 'auditoria',
       component: () => import('@/views/AuditoriaView.vue'),

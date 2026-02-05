@@ -78,6 +78,51 @@
         </div>
       </div>
 
+      <!-- RF-04: Banner de Alerta por Vencimiento -->
+      <div
+        v-if="isCasoVencido"
+        class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg"
+      >
+        <div class="flex items-center">
+          <ExclamationTriangleIcon class="h-6 w-6 text-red-500 mr-3" />
+          <div>
+            <p class="text-sm font-semibold text-red-800">
+              Este caso se encuentra VENCIDO
+            </p>
+            <p class="text-sm text-red-700">
+              No se permiten acciones operativas. Contacte al supervisor para gestionar este caso.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-else-if="isPreAlerta"
+        class="border-l-4 p-4 rounded-r-lg"
+        :class="semaforoCodigo === 'NARANJA' ? 'bg-orange-50 border-orange-500' : 'bg-yellow-50 border-yellow-500'"
+      >
+        <div class="flex items-center">
+          <ClockIcon
+            class="h-6 w-6 mr-3"
+            :class="semaforoCodigo === 'NARANJA' ? 'text-orange-500' : 'text-yellow-500'"
+          />
+          <div>
+            <p
+              class="text-sm font-semibold"
+              :class="semaforoCodigo === 'NARANJA' ? 'text-orange-800' : 'text-yellow-800'"
+            >
+              Este caso esta proximo a vencer
+            </p>
+            <p
+              class="text-sm"
+              :class="semaforoCodigo === 'NARANJA' ? 'text-orange-700' : 'text-yellow-700'"
+            >
+              Fecha limite: {{ formatDate(caso.fechaLimite) }}. Priorice su atencion.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Tabs de navegación -->
       <div class="border-b border-gray-200">
         <nav class="flex space-x-8" aria-label="Tabs">
@@ -267,6 +312,7 @@ import {
   ArrowUpCircleIcon,
   PencilSquareIcon,
   DocumentTextIcon,
+  ClockIcon,
 } from '@heroicons/vue/24/outline'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -286,7 +332,7 @@ import { useCasosStore } from '@/stores/casos'
 import { adjuntosApi } from '@/api/adjuntos'
 import { escalamientosApi } from '@/api/escalamientos'
 import { auditoriaApi } from '@/api/auditoria'
-import { formatFileSize, formatRelativeTime, formatDateTime, downloadFile } from '@/utils/helpers'
+import { formatFileSize, formatRelativeTime, formatDateTime, formatDate, downloadFile } from '@/utils/helpers'
 import { useToast } from '@/composables/useToast'
 import type { Escalamiento, AuditoriaEvento, HistorialEvento, TipoEvento } from '@/types'
 
@@ -308,6 +354,17 @@ const caso = computed(() => casosStore.casoActual)
 // Detectar si el caso está vencido (estado terminal operativo)
 const isCasoVencido = computed(() => {
   return caso.value?.codigoEstado === 'VENCIDO'
+})
+
+// RF-04: Código del semáforo actual
+const semaforoCodigo = computed(() => {
+  return caso.value?.semaforo?.codigo?.toUpperCase() || ''
+})
+
+// RF-04: Detectar si el caso está en pre-alerta (amarillo o naranja)
+const isPreAlerta = computed(() => {
+  const codigo = semaforoCodigo.value
+  return codigo === 'AMARILLA' || codigo === 'NARANJA'
 })
 
 const tabs = computed(() => [
