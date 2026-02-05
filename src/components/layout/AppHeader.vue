@@ -36,12 +36,7 @@
 
       <!-- Right Actions: Notifications & User Profile -->
       <div class="flex items-center gap-6">
-        <button
-          type="button"
-          class="relative p-2.5 bg-blue-50/50 text-gray-700 hover:text-blue-600 rounded-full transition-colors"
-        >
-          <BellIcon class="h-6 w-6" />
-        </button>
+        <AlertaBadge />
 
         <Menu as="div" class="relative">
           <MenuButton class="group flex items-center">
@@ -102,8 +97,8 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { BellIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import AlertaBadge from '@/components/alertas/AlertaBadge.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -113,6 +108,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Sistema PQR'
 const menuItems = computed(() => {
   const items = [
     { path: '/casos', label: 'Casos' },
+    { path: '/alertas', label: 'Alertas' },
     { path: '/reportes', label: 'Reportes' }
   ]
 

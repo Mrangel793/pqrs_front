@@ -304,3 +304,43 @@ export interface PDFGenerarResponse {
   url_descarga: string
   fecha_generacion: string
 }
+
+// RF-04: Tipos para Alertas
+export interface SemaforoBandeja {
+  id: number
+  codigo: string        // 'VERDE', 'AMARILLA', 'NARANJA', 'ROJO'
+  color_hex: string
+  cantidad: number
+}
+
+export interface AlertaBandeja {
+  total_casos: number
+  por_semaforo: SemaforoBandeja[]
+  casos_vencidos: number
+  casos_por_vencer: number
+  casos_activos: number
+}
+
+export interface AlertaCasoItem {
+  caso_id: string
+  radicado: string
+  tipo_tramite: string
+  peticionario_nombre: string
+  fecha_recepcion: string
+  fecha_vencimiento: string
+  dias_transcurridos: number
+  dias_restantes: number
+  semaforo_actual_id: number
+  semaforo_actual_codigo: string
+  color_hex: string
+  estado_caso_id: number
+  estado_caso_codigo: string
+  responsable_nombre: string | null
+  es_vencido: boolean
+  es_pre_alerta: boolean
+}
+
+export interface AlertaCasoPaginado {
+  total: number
+  items: AlertaCasoItem[]
+}
