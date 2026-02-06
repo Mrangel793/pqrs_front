@@ -346,6 +346,8 @@ export interface AlertaCasoItem {
   responsable_nombre: string | null
   es_vencido: boolean
   es_pre_alerta: boolean
+  tiempo_vencido_humano?: string
+  tiempo_restante_humano?: string
 }
 
 export interface AlertaCasoPaginado {

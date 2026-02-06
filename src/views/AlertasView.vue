@@ -92,9 +92,7 @@
                 <span
                   v-if="alertasStore.bandeja?.casos_vencidos"
                   class="ml-2 px-2 py-0.5 text-xs rounded-full text-white"
-                  style="background-color: #DC3545"
                 >
-                  {{ alertasStore.bandeja.casos_vencidos }}
                 </span>
               </button>
             </Tab>
@@ -113,10 +111,8 @@
                 Por Vencer
                 <span
                   v-if="alertasStore.bandeja?.casos_por_vencer"
-                  class="ml-2 px-2 py-0.5 text-xs rounded-full text-gray-900"
-                  style="background-color: #FFC107"
+                  class="ml-2 px-2 py-0.5 text-xs text-gray-900"
                 >
-                  {{ alertasStore.bandeja.casos_por_vencer }}
                 </span>
               </button>
             </Tab>

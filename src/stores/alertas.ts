@@ -14,12 +14,12 @@ export const useAlertasStore = defineStore('alertas', () => {
   // Paginación para vencidos
   const totalVencidos = ref(0)
   const pageVencidos = ref(1)
-  const pageSizeVencidos = ref(20)
+  const pageSizeVencidos = ref(10)
 
   // Paginación para por vencer
   const totalPorVencer = ref(0)
   const pagePorVencer = ref(1)
-  const pageSizePorVencer = ref(20)
+  const pageSizePorVencer = ref(10)
 
   // Filtro mis casos
   const soloMisCasos = ref(false)

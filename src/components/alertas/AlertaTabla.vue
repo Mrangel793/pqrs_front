@@ -103,15 +103,22 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm">
               <span
-                v-if="caso.es_vencido"
+                v-if="caso.es_vencido && caso.tiempo_vencido_humano"
                 class="font-semibold text-red-600"
               >
-                {{ Math.abs(caso.dias_restantes) }} días vencido
+                {{ caso.tiempo_vencido_humano }}
               </span>
               <span
-                v-else
+                v-else-if="!caso.es_vencido && caso.tiempo_restante_humano"
                 :class="getDiasClass(caso.dias_restantes)"
               >
+                {{ caso.tiempo_restante_humano }}
+              </span>
+              <!-- Fallback a lógica anterior si no hay campos nuevos -->
+              <span v-else-if="caso.es_vencido" class="font-semibold text-red-600">
+                {{ Math.abs(caso.dias_restantes) }} días vencido
+              </span>
+              <span v-else :class="getDiasClass(caso.dias_restantes)">
                 {{ caso.dias_restantes }} días restantes
               </span>
             </div>
@@ -121,7 +128,7 @@
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
               :style="{
                 backgroundColor: `${caso.color_hex}20`,
-                color: caso.color_hex
+                color: caso.color_hex,
               }"
             >
               <span
